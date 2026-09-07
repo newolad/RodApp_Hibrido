@@ -1,0 +1,155 @@
+/*
+ * =============================================================================
+ *  RodApp - Design tokens
+ * =============================================================================
+ *  Valores extraidos del mockup de Figma "RodApp" y de la paleta del proyecto
+ *  Android original. Se sobreescriben las variables de Ionic (--ion-color-*)
+ *  y se agregan variables propias (--rod-*) para lo que no tiene equivalente
+ *  directo en Ionic (superficies oscuras, radios de pildora, etc).
+ *
+ *  La app usa un unico tema OSCURO en web y en movil (coherencia de color
+ *  pedida en el brief), por eso los tokens se definen sobre :root y no se
+ *  duplican en `prefers-color-scheme`.
+ * =============================================================================
+ */
+
+:root {
+  /* ---------- Marca / acento (cian del mockup) ---------- */
+  --ion-color-primary: #11b4d4;
+  --ion-color-primary-rgb: 17, 180, 212;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #0f9ebb;
+  --ion-color-primary-tint: #29bbd9;
+
+  --ion-color-secondary: #3b82f6;
+  --ion-color-secondary-rgb: 59, 130, 246;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #3472d8;
+  --ion-color-secondary-tint: #4f8ff7;
+
+  --ion-color-tertiary: #8b5cf6;
+  --ion-color-tertiary-rgb: 139, 92, 246;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #7a51d8;
+  --ion-color-tertiary-tint: #976cf7;
+
+  --ion-color-success: #22c55e;
+  --ion-color-success-rgb: 34, 197, 94;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #1ead53;
+  --ion-color-success-tint: #38cb6e;
+
+  --ion-color-warning: #f59e0b;
+  --ion-color-warning-rgb: 245, 158, 11;
+  --ion-color-warning-contrast: #1a1c1e;
+  --ion-color-warning-contrast-rgb: 26, 28, 30;
+  --ion-color-warning-shade: #d78b0a;
+  --ion-color-warning-tint: #f6a823;
+
+  --ion-color-danger: #ef4444;
+  --ion-color-danger-rgb: 239, 68, 68;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #d23c3c;
+  --ion-color-danger-tint: #f15757;
+
+  --ion-color-light: #1e2124;
+  --ion-color-light-rgb: 30, 33, 36;
+  --ion-color-light-contrast: #f1f5f9;
+  --ion-color-light-contrast-rgb: 241, 245, 249;
+  --ion-color-light-shade: #1a1d1f;
+  --ion-color-light-tint: #383b3e;
+
+  --ion-color-medium: #94a3b8;
+  --ion-color-medium-rgb: 148, 163, 184;
+  --ion-color-medium-contrast: #1a1c1e;
+  --ion-color-medium-contrast-rgb: 26, 28, 30;
+  --ion-color-medium-shade: #828fa2;
+  --ion-color-medium-tint: #9fadbf;
+
+  --ion-color-dark: #f1f5f9;
+  --ion-color-dark-rgb: 241, 245, 249;
+  --ion-color-dark-contrast: #101f22;
+  --ion-color-dark-contrast-rgb: 16, 31, 34;
+  --ion-color-dark-shade: #d4d8db;
+  --ion-color-dark-tint: #f2f6fa;
+
+  /* ---------- Superficies (3 tonos de fondo del mockup) ---------- */
+  --rod-bg-base: #101f22;   /* Login, Dashboard, Garaje, Mapa, Historial, Perfil */
+  --rod-bg-alt: #1e2124;    /* Crear Cuenta, Configuracion de Perfil */
+  --rod-bg-alt-2: #1a1c1e;  /* Ruta seleccionada / modales */
+  --rod-surface: #2b2f33;   /* Inputs sobre fondo alt */
+  --rod-surface-2: #334155; /* Chips / avatares */
+  --rod-border: rgba(148, 163, 184, 0.18);
+  --rod-border-accent: rgba(17, 180, 212, 0.35);
+  --rod-accent-soft: rgba(17, 180, 212, 0.12);
+
+  /* ---------- Texto ---------- */
+  --rod-text-heading: #f1f5f9;
+  --rod-text-body: #cbd5e1;
+  --rod-text-secondary: #94a3b8;
+  --rod-text-secondary-alt: #9ca3af;
+  --rod-text-muted: #64748b;
+
+  /* ---------- Forma ---------- */
+  --rod-radius-pill: 9999px; /* inputs y botones tipo capsula */
+  --rod-radius-card: 16px;   /* tarjetas / inputs sobre fondo alt */
+  --rod-radius-lg: 24px;
+
+  /* ---------- Tipografia ---------- */
+  --rod-font-heading: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --rod-font-body: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  /* ---------- Overrides globales de Ionic (modo oscuro) ---------- */
+  --ion-background-color: var(--rod-bg-base);
+  --ion-background-color-rgb: 16, 31, 34;
+  --ion-text-color: var(--rod-text-heading);
+  --ion-text-color-rgb: 241, 245, 249;
+
+  --ion-font-family: var(--rod-font-body);
+
+  --ion-toolbar-background: var(--rod-bg-base);
+  --ion-toolbar-color: var(--rod-text-heading);
+  --ion-tab-bar-background: var(--rod-bg-alt);
+  --ion-tab-bar-color: var(--rod-text-secondary);
+  --ion-tab-bar-color-selected: var(--ion-color-primary);
+  --ion-item-background: transparent;
+
+  --ion-card-background: var(--rod-bg-alt);
+  --ion-border-color: var(--rod-border);
+
+  /* Escala de grises de Ionic recalibrada para fondo oscuro */
+  --ion-color-step-50: #1a2a2d;
+  --ion-color-step-100: #24393d;
+  --ion-color-step-150: #2e484c;
+  --ion-color-step-200: #38575c;
+  --ion-color-step-250: #42666b;
+  --ion-color-step-300: #4c757b;
+  --ion-color-step-350: #56848a;
+  --ion-color-step-400: #60939a;
+  --ion-color-step-450: #6aa2a9;
+  --ion-color-step-500: #74b1b9;
+  --ion-color-step-550: #85bcc3;
+  --ion-color-step-600: #96c7cd;
+  --ion-color-step-650: #a7d2d7;
+  --ion-color-step-700: #b8dde1;
+  --ion-color-step-750: #c9e8eb;
+  --ion-color-step-800: #daf3f5;
+  --ion-color-step-850: #e6f7f9;
+  --ion-color-step-900: #f2fbfc;
+  --ion-color-step-950: #f9fdfe;
+}
+
+/* Clases de color utilitarias para <ion-*> con color="warning|success|..." en fondo oscuro */
+.ion-color-primary {
+  --ion-color-base: var(--ion-color-primary);
+  --ion-color-base-rgb: var(--ion-color-primary-rgb);
+  --ion-color-contrast: var(--ion-color-primary-contrast);
+  --ion-color-contrast-rgb: var(--ion-color-primary-contrast-rgb);
+  --ion-color-shade: var(--ion-color-primary-shade);
+  --ion-color-tint: var(--ion-color-primary-tint);
+}

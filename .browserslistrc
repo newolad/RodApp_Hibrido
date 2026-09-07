@@ -1,0 +1,12 @@
+# Navegadores objetivo para la build web + WebView de Capacitor.
+# https://github.com/browserslist/browserslist
+last 2 Chrome versions
+last 2 Firefox versions
+last 2 Edge major versions
+last 2 Safari major versions
+last 2 iOS major versions
+Chrome >= 61
+ChromeAndroid >= 61
+Firefox >= 63
+Safari >= 13
+iOS >= 13

@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="RodApp">
+  <rect width="512" height="512" rx="112" fill="#101f22"/>
+  <circle cx="256" cy="256" r="150" fill="none" stroke="#11b4d4" stroke-width="28"/>
+  <path d="M196 168h74a60 60 0 0 1 18 117l40 59h-58l-36-54h-20v54h-40V168zm40 40v46h34a23 23 0 0 0 0-46h-34z" fill="#f1f5f9"/>
+</svg>

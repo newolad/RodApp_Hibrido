@@ -1,0 +1,7 @@
+{
+  "name": "RodApp Hibrido",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

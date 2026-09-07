@@ -1,0 +1,36 @@
+# --- Dependencias ---
+/node_modules
+npm-debug.log*
+yarn-error.log*
+
+# --- Builds ---
+/www
+/dist
+/out-tsc
+/.angular/cache
+*.tsbuildinfo
+
+# --- Capacitor / nativo (se regeneran con `npx cap add`) ---
+/android
+/ios
+
+# --- Entorno / secretos ---
+/src/environments/environment.local.ts
+.env
+.env.*
+!.env.example
+
+# --- Supabase CLI ---
+/supabase/.branches
+/supabase/.temp
+/supabase/.env
+
+# --- IDE / SO ---
+.idea/
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# --- Tests ---
+/coverage

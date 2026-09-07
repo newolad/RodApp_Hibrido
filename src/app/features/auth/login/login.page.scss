@@ -1,0 +1,207 @@
+// Frame "login": fondo #101f22, inputs pildora, boton cian, tipografia Inter.
+
+.login-content {
+  --background: var(--rod-bg-base);
+}
+
+.login-wrapper {
+  position: relative;
+  min-height: 100%;
+  padding: 32px 0;
+  overflow: hidden;
+}
+
+// Circulos decorativos difuminados
+.bg-decoration {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.blur-circle {
+  position: absolute;
+  border-radius: var(--rod-radius-pill);
+  background: radial-gradient(circle, rgba(17, 180, 212, 0.18) 0%, transparent 70%);
+  filter: blur(40px);
+}
+.blur-top {
+  width: 300px;
+  height: 300px;
+  top: -120px;
+  right: -80px;
+}
+.blur-bottom {
+  width: 260px;
+  height: 260px;
+  bottom: -100px;
+  left: -80px;
+}
+
+.login-main {
+  position: relative;
+  z-index: 1;
+  padding-top: 24px;
+  padding-bottom: 24px;
+}
+
+// ---- Logo ----
+.logo-section {
+  margin-bottom: 40px;
+}
+.logo-badge {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--rod-radius-pill);
+  background: var(--ion-color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+
+  ion-icon {
+    font-size: 34px;
+    color: #ffffff;
+  }
+}
+.app-title {
+  font-family: var(--rod-font-heading);
+  font-weight: 700;
+  font-size: 30px;
+  color: var(--rod-text-heading);
+  margin: 0;
+}
+.app-subtitle {
+  font-family: var(--rod-font-body);
+  font-size: 16px;
+  color: var(--ion-color-primary);
+  margin: 6px 0 0;
+}
+
+// ---- Formulario ----
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.field-label {
+  font-family: var(--rod-font-body);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--rod-text-body);
+  padding: 0 4px;
+}
+.pill-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 56px;
+  padding: 0 16px;
+  border-radius: var(--rod-radius-pill);
+  background: var(--rod-accent-soft);
+  border: 1px solid var(--rod-border-accent);
+  transition: border-color 0.15s ease;
+
+  &.invalid {
+    border-color: var(--ion-color-danger);
+  }
+
+  ion-icon {
+    color: var(--ion-color-primary);
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .toggle-icon {
+    cursor: pointer;
+  }
+  input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--rod-text-heading);
+    font-family: var(--rod-font-body);
+    font-size: 15px;
+
+    &::placeholder {
+      color: var(--rod-text-muted);
+    }
+  }
+}
+.forgot-link {
+  align-self: flex-start;
+  font-family: var(--rod-font-body);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--ion-color-primary);
+  text-decoration: none;
+}
+.login-button {
+  margin-top: 4px;
+}
+
+// ---- Google ----
+.sso-section {
+  margin-top: 36px;
+}
+.divider-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--rod-border);
+}
+.divider-text {
+  font-family: var(--rod-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--rod-text-muted);
+  white-space: nowrap;
+}
+.google-button {
+  width: 100%;
+  height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: var(--rod-radius-pill);
+  background: var(--rod-accent-soft);
+  border: 1px solid var(--rod-border-accent);
+  color: var(--rod-text-heading);
+  font-family: var(--rod-font-heading);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+  }
+  ion-icon {
+    font-size: 20px;
+    color: var(--ion-color-primary);
+  }
+}
+
+// ---- Footer ----
+.footer-text {
+  text-align: center;
+  margin-top: 40px;
+  font-family: var(--rod-font-body);
+  font-size: 14px;
+  color: var(--rod-text-secondary-alt);
+}
+.footer-link {
+  color: var(--ion-color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
