@@ -1,0 +1,101 @@
+<!-- Frame "login" del mockup de Figma (390x884, fondo #101f22) -->
+<ion-content class="login-content" [fullscreen]="true">
+  <div class="login-wrapper">
+
+    <!-- Decoracion: dos circulos difuminados cian (como en el mockup) -->
+    <div class="bg-decoration" aria-hidden="true">
+      <div class="blur-circle blur-top"></div>
+      <div class="blur-circle blur-bottom"></div>
+    </div>
+
+    <div class="login-main rod-container">
+
+      <!-- Logo -->
+      <div class="logo-section">
+        <div class="logo-badge">
+          <ion-icon name="bicycle" aria-hidden="true"></ion-icon>
+        </div>
+        <h1 class="app-title">RodApp</h1>
+        <p class="app-subtitle">Bienvenido de nuevo</p>
+      </div>
+
+      <!-- Formulario correo + contrasena -->
+      <form class="login-form" [formGroup]="form" (ngSubmit)="iniciarSesion()">
+        <div class="field-group">
+          <label class="field-label" for="email">Correo electronico</label>
+          <div class="pill-input" [class.invalid]="form.controls.email.touched && form.controls.email.invalid">
+            <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
+            <input
+              id="email"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              placeholder="tucorreo@ejemplo.com"
+              formControlName="email"
+            />
+          </div>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label" for="password">Contrasena</label>
+          <div class="pill-input" [class.invalid]="form.controls.password.touched && form.controls.password.invalid">
+            <ion-icon name="lock-closed-outline" aria-hidden="true"></ion-icon>
+            <input
+              id="password"
+              [type]="verPassword() ? 'text' : 'password'"
+              autocomplete="current-password"
+              placeholder="Tu contrasena"
+              formControlName="password"
+            />
+            <ion-icon
+              class="toggle-icon"
+              [name]="verPassword() ? 'eye-off-outline' : 'eye-outline'"
+              role="button"
+              [attr.aria-label]="verPassword() ? 'Ocultar contrasena' : 'Mostrar contrasena'"
+              (click)="togglePassword()"
+            ></ion-icon>
+          </div>
+        </div>
+
+        <a class="forgot-link" routerLink="/registro">Crear una cuenta nueva</a>
+
+        <ion-button
+          expand="block"
+          shape="round"
+          type="submit"
+          class="rod-btn-primary login-button"
+          [disabled]="cargando()"
+        >
+          @if (cargando()) {
+            <ion-spinner name="crescent" slot="start"></ion-spinner>
+          }
+          {{ cargando() ? 'Ingresando...' : 'Iniciar sesion' }}
+        </ion-button>
+      </form>
+
+      <!-- Acceso con Google -->
+      <div class="sso-section">
+        <div class="divider-row">
+          <span class="divider-line"></span>
+          <span class="divider-text">O continua con</span>
+          <span class="divider-line"></span>
+        </div>
+
+        <button
+          type="button"
+          class="google-button"
+          [disabled]="cargando()"
+          (click)="iniciarConGoogle()"
+        >
+          <ion-icon name="logo-google" aria-hidden="true"></ion-icon>
+          <span>Google</span>
+        </button>
+      </div>
+
+      <p class="footer-text">
+        ¿No tienes cuenta?
+        <a routerLink="/registro" class="footer-link">Registrate</a>
+      </p>
+    </div>
+  </div>
+</ion-content>

@@ -1,0 +1,5 @@
+# Las migraciones SQL van aqui (una por archivo, con prefijo de timestamp).
+# Generar con:  supabase migration new <nombre>
+# Aplicar con:  supabase db push
+#
+# Vacio a proposito: el esquema se definira en una etapa posterior.

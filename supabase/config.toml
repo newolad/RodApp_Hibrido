@@ -1,0 +1,48 @@
+# Configuracion del proyecto Supabase (CLI).
+# Docs: https://supabase.com/docs/guides/cli/config
+#
+# Este archivo permite levantar Supabase en local con `supabase start` y
+# versionar migraciones. El ID debe coincidir con el "Reference ID" del
+# proyecto en la nube (Project Settings > General).
+
+project_id = "rodapp-hibrido"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[auth]
+enabled = true
+# URL base del sitio para los enlaces de correo (confirmacion, recuperacion).
+site_url = "http://localhost:8100"
+# Destinos permitidos tras el login (web + deep link nativo para Google OAuth).
+additional_redirect_urls = [
+  "http://localhost:8100/auth/callback",
+  "com.rodapp.hibrido://auth/callback",
+]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+
+# Proveedor de Google OAuth. Los valores reales se cargan desde variables de
+# entorno (no se versionan): SUPABASE_AUTH_GOOGLE_CLIENT_ID / _SECRET.
+[auth.external.google]
+enabled = true
+client_id = "env(SUPABASE_AUTH_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_GOOGLE_SECRET)"
+redirect_uri = ""

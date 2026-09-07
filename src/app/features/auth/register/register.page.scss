@@ -1,0 +1,175 @@
+// Frame "Crear Cuenta": fondo #1e2124, inputs tipo tarjeta (radio 16px).
+// Deliberadamente distinto al estilo "pildora" del login (asi lo separa el mockup).
+
+.register-content {
+  --background: var(--rod-bg-alt);
+}
+
+.register-wrapper {
+  padding-top: 16px;
+  padding-bottom: 32px;
+}
+
+.header {
+  padding: 24px 0 32px;
+}
+.back-button {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--rod-radius-pill);
+  background: var(--rod-surface);
+  border: none;
+  color: var(--rod-text-heading);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  padding: 0;
+  cursor: pointer;
+
+  ion-icon {
+    font-size: 20px;
+  }
+}
+.title {
+  font-family: var(--rod-font-heading);
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--rod-text-heading);
+  margin: 0 0 8px;
+}
+.subtitle {
+  font-family: var(--rod-font-body);
+  font-size: 15px;
+  color: var(--rod-text-secondary-alt);
+  margin: 0;
+  line-height: 1.45;
+}
+
+.register-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.field-label {
+  font-family: var(--rod-font-body);
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--rod-text-secondary-alt);
+}
+.field-error {
+  font-size: 12px;
+  color: var(--ion-color-danger);
+  padding: 0 4px;
+}
+.card-input {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 54px;
+  padding: 0 16px;
+  border-radius: var(--rod-radius-card);
+  background: var(--rod-surface);
+  border: 1px solid transparent;
+  transition: border-color 0.15s ease;
+
+  &.invalid {
+    border-color: var(--ion-color-danger);
+  }
+
+  ion-icon {
+    color: var(--ion-color-primary);
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .toggle-icon {
+    cursor: pointer;
+  }
+  input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--rod-text-heading);
+    font-family: var(--rod-font-body);
+    font-size: 15px;
+
+    &::placeholder {
+      color: var(--rod-text-muted);
+    }
+  }
+}
+
+.register-button {
+  margin-top: 6px;
+}
+
+.sso-section {
+  margin-top: 28px;
+}
+.divider-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.divider-line {
+  flex: 1;
+  height: 1px;
+  background: var(--rod-border);
+}
+.divider-text {
+  font-family: var(--rod-font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--rod-text-muted);
+  white-space: nowrap;
+}
+.google-button {
+  width: 100%;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border-radius: var(--rod-radius-pill);
+  background: transparent;
+  border: 1px solid var(--rod-border-accent);
+  color: var(--rod-text-heading);
+  font-family: var(--rod-font-heading);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+  }
+  ion-icon {
+    font-size: 20px;
+    color: var(--ion-color-primary);
+  }
+}
+
+.footer-text {
+  text-align: center;
+  margin-top: 32px;
+  font-family: var(--rod-font-body);
+  font-size: 14px;
+  color: var(--rod-text-secondary-alt);
+}
+.footer-link {
+  color: var(--ion-color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}

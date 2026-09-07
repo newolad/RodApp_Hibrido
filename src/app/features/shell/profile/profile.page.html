@@ -1,0 +1,68 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Perfil</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense" class="ion-no-border">
+    <ion-toolbar>
+      <ion-title size="large">Perfil</ion-title>
+    </ion-toolbar>
+  </ion-header>
+
+  <div class="rod-container">
+
+    <!-- Tarjeta de identidad (datos reales de la sesion de Supabase) -->
+    <section class="perfil-card rod-card">
+      <div class="avatar">
+        @if (sesion()?.avatarUrl) {
+          <img [src]="sesion()!.avatarUrl" alt="Foto de perfil" />
+        } @else {
+          <span>{{ iniciales() }}</span>
+        }
+      </div>
+      <div class="datos">
+        <h2>{{ sesion()?.nombre ?? 'Motero' }}</h2>
+        <p>{{ sesion()?.email ?? 'Sin correo' }}</p>
+      </div>
+    </section>
+
+    <!-- Opciones (placeholder de ajustes; se implementaran despues) -->
+    <section class="opciones rod-card">
+      <button type="button" class="opcion" disabled>
+        <ion-icon name="person-circle-outline" aria-hidden="true"></ion-icon>
+        <span>Editar datos personales</span>
+        <ion-icon name="chevron-forward-outline" class="chev" aria-hidden="true"></ion-icon>
+      </button>
+      <button type="button" class="opcion" disabled>
+        <ion-icon name="notifications-outline" aria-hidden="true"></ion-icon>
+        <span>Notificaciones</span>
+        <ion-icon name="chevron-forward-outline" class="chev" aria-hidden="true"></ion-icon>
+      </button>
+      <button type="button" class="opcion" disabled>
+        <ion-icon name="shield-checkmark-outline" aria-hidden="true"></ion-icon>
+        <span>Seguridad</span>
+        <ion-icon name="chevron-forward-outline" class="chev" aria-hidden="true"></ion-icon>
+      </button>
+    </section>
+
+    <!-- Cerrar sesion -->
+    <ion-button
+      expand="block"
+      shape="round"
+      fill="outline"
+      color="danger"
+      class="logout-btn"
+      [disabled]="cerrando()"
+      (click)="cerrarSesion()"
+    >
+      @if (cerrando()) {
+        <ion-spinner name="crescent" slot="start"></ion-spinner>
+      } @else {
+        <ion-icon name="log-out-outline" slot="start" aria-hidden="true"></ion-icon>
+      }
+      {{ cerrando() ? 'Cerrando...' : 'Cerrar sesion' }}
+    </ion-button>
+  </div>
+</ion-content>

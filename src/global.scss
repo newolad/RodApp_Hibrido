@@ -1,0 +1,117 @@
+/*
+ * Estilos globales de RodApp.
+ * Aqui se importan los CSS base de Ionic (obligatorio) y utilidades propias
+ * que se repiten en varias vistas (para NO duplicar reglas en cada pagina).
+ */
+
+/* ----- Ionic core (obligatorio) ----- */
+@import '@ionic/angular/css/core.css';
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
+@import '@ionic/angular/css/display.css';
+
+/* ----- Ionic opcionales de layout (usados por las vistas) ----- */
+@import '@ionic/angular/css/padding.css';
+@import '@ionic/angular/css/float-elements.css';
+@import '@ionic/angular/css/text-alignment.css';
+@import '@ionic/angular/css/text-transformation.css';
+@import '@ionic/angular/css/flex-utils.css';
+
+/* ----- Forzamos el modo oscuro de Ionic en toda la app ----- */
+@import '@ionic/angular/css/palettes/dark.always.css';
+
+/* =========================================================================
+ *  Utilidades compartidas por las vistas (coherencia visual)
+ * ========================================================================= */
+
+body {
+  font-family: var(--rod-font-body);
+  background: var(--rod-bg-base);
+  color: var(--rod-text-heading);
+}
+
+/* Contenedor centrado y con ancho maximo: en web evita que el contenido
+   se estire en pantallas anchas y mantiene la sensacion "app movil". */
+.rod-container {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px;
+  box-sizing: border-box;
+}
+
+/* Titulo de seccion reutilizable */
+.rod-heading {
+  font-family: var(--rod-font-heading);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.2;
+  color: var(--rod-text-heading);
+  margin: 0 0 4px;
+}
+
+.rod-subheading {
+  font-family: var(--rod-font-body);
+  font-size: 15px;
+  color: var(--rod-text-secondary);
+  margin: 0;
+}
+
+/* Tarjeta base */
+.rod-card {
+  background: var(--rod-bg-alt);
+  border: 1px solid var(--rod-border);
+  border-radius: var(--rod-radius-card);
+  padding: 20px;
+}
+
+/* Boton primario tipo pildora (mismo look en login, registro y formularios) */
+.rod-btn-primary {
+  --background: var(--ion-color-primary);
+  --background-activated: var(--ion-color-primary-shade);
+  --border-radius: var(--rod-radius-pill);
+  --box-shadow: none;
+  --color: #ffffff;
+  height: 54px;
+  font-family: var(--rod-font-heading);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  text-transform: none;
+}
+
+/* Estado vacio reutilizable (placeholder de las vistas aun sin datos) */
+.rod-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 56px 24px;
+  color: var(--rod-text-secondary);
+
+  ion-icon {
+    font-size: 56px;
+    color: var(--ion-color-primary);
+    opacity: 0.85;
+  }
+
+  h2 {
+    font-family: var(--rod-font-heading);
+    font-weight: 600;
+    font-size: 18px;
+    color: var(--rod-text-heading);
+    margin: 4px 0 0;
+  }
+
+  p {
+    font-size: 14px;
+    margin: 0;
+    max-width: 260px;
+  }
+}
+
+/* La barra de tabs no debe tapar contenido en iPhone con notch */
+ion-tab-bar {
+  padding-bottom: var(--ion-safe-area-bottom, 0);
+}

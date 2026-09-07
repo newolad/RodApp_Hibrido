@@ -1,0 +1,2 @@
+-- Datos de siembra para desarrollo local (`supabase db reset` los aplica).
+-- Vacio a proposito: se completara cuando exista el esquema.

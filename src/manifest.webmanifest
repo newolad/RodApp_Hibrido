@@ -1,0 +1,20 @@
+{
+  "name": "RodApp",
+  "short_name": "RodApp",
+  "description": "Gestiona los documentos, mantenimiento y gastos de tus motocicletas.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#101f22",
+  "theme_color": "#101f22",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "assets/icon/logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
