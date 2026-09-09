@@ -34,3 +34,6 @@ Thumbs.db
 
 # --- Tests ---
 /coverage
+
+# --- Repos anidados (proyecto Git independiente con su propio remoto) ---
+/Entrega_hibridas
