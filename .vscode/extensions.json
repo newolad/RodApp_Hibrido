@@ -1,9 +1,9 @@
 {
   "recommendations": [
     "angular.ng-template",
-    "ionic.ionic",
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
-    "editorconfig.editorconfig"
+    "editorconfig.editorconfig",
+    "Webnative.webnative"
   ]
 }
