@@ -20,7 +20,11 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 | 🟨 | Vista en código como *placeholder* (sin contenido real ni mockup detallado) |
 | ⬜ | Pendiente (no existe ni mockup ni código) |
 
-**Resumen:** 7 vistas abordadas (2 completas, 5 placeholder) · ~33 vistas pendientes.
+**Resumen (2026-09-10):** 22 vistas abordadas (7 completas, 15 placeholder/scaffold) ·
+28 vistas pendientes. Las 15 en 🟨 incluyen las 13 vistas nuevas creadas a partir
+del inventario de `FIGMA-PAGE1-VISTAS.txt` (formularios y detalles con datos de
+ejemplo, sin persistencia en Supabase todavía) más los 2 estados agrupados en la
+misma vista de Notificaciones.
 
 ---
 
@@ -38,6 +42,9 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 | 1.8 | Nueva contraseña | Formulario para definir la contraseña nueva (retorno del enlace de correo). | ⬜ | `/auth/callback` (modo recovery) | Supabase Auth |
 | 1.9 | Desbloqueo biométrico | Pantalla de acceso rápido con huella / Face ID. | ⬜ | (nativo, al abrir) | `AVANCES.md` (biometría) |
 | 1.10 | Callback OAuth | Pantalla puente ("Conectando con Google…") mientras se canjea el código. | ✅ | `/auth/callback` | (solo código, sin mockup) |
+| 1.11 | Login exitoso | Puente de confirmación tras autenticarse, antes de entrar al shell. | 🟨 | `/login-exitoso` | Frame Figma "Login exitoso" (`7:4394`) |
+| 1.12 | SSO — entrada | Pantalla de acceso rápido con Google, separada del botón dentro de `/login`. | 🟨 | `/sso` | Frame Figma "sso" (`7:4289`) |
+| 1.13 | SSO — confirmación | Confirma que la cuenta de Google quedó vinculada tras el retorno de OAuth. | 🟨 | `/sso/confirmacion` | Frame Figma "sso confirmación" (`7:4336`) |
 
 ## 2. Inicio / Dashboard
 
@@ -54,7 +61,7 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 | 3.1 | **Garaje — vacío** | Estado vacío con CTA "Registrar moto". | ✅ | `/app/garaje` | `fragment_garaje.xml`, `garage.html` |
 | 3.2 | Garaje — con motos | Lista/galería de motos (foto, marca-modelo, placa, km) + botón añadir. | ⬜ | `/app/garaje` (estado lleno) | `fragment_garaje.xml`, `garage.html` |
 | 3.3 | Registrar moto | Formulario: marca, modelo, cilindrada, placa, color, odómetro inicial, foto. | ⬜ | `/app/garaje/nueva` | `fragment_registro_moto.xml`, `moto-register.html` |
-| 3.4 | Detalle de moto | Ficha de la moto: datos, documentos, mantenimientos, combustible, editar/eliminar. | ⬜ | `/app/garaje/:id` | `moto-detail.html` |
+| 3.4 | Detalle de moto | Ficha de la moto: datos, documentos, mantenimientos, combustible, editar/eliminar. | 🟨 | `/app/garaje/detalle` (falta id dinámico `:id`) | Frame Figma "Garaje (Sin Documentos) 1 y 2" (`7:4036`/`7:4140`), `moto-detail.html` |
 | 3.5 | Documentos de la moto | Sección dentro del detalle: SOAT, tecnomecánica y otros con su vigencia. | ⬜ | `/app/garaje/:id/documentos` | `fragment_garaje_documentos.xml` |
 | 3.6 | Editar moto | Formulario de edición de una moto existente. | ⬜ | `/app/garaje/:id/editar` | `RegistroMotoFragment.kt` (reutilizado) |
 
@@ -62,10 +69,10 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 
 | # | Vista | Descripción | Estado | Ruta Ionic | Fuente |
 |---|---|---|---|---|---|
-| 4.1 | Registrar SOAT | Nº de póliza, aseguradora, fecha de inicio y de vencimiento. | ⬜ | `/app/garaje/:id/soat/nuevo` | `fragment_registro_soat.xml`, `RegistroSOATFragment.kt` |
-| 4.2 | Registrar RTM (tecnomecánica) | Nº de certificado, CDA, fecha de expedición y vencimiento. | ⬜ | `/app/garaje/:id/rtm/nuevo` | `fragment_registro_rtm.xml`, `RegistroRTMFragment.kt` |
+| 4.1 | Registrar SOAT | Nº de póliza, aseguradora, fecha de inicio y de vencimiento. | 🟨 | `/app/garaje/soat/nuevo` (falta id de moto) | Frame Figma "Plantilla reg SOAT" (`2:2517`), `fragment_registro_soat.xml` |
+| 4.2 | Registrar RTM (tecnomecánica) | Nº de certificado, CDA, fecha de expedición y vencimiento. | 🟨 | `/app/garaje/rtm/nuevo` (falta id de moto) | Frame Figma "Plantilla reg RTM" (`2:2602`), `fragment_registro_rtm.xml` |
 | 4.3 | Nuevo documento | Alta genérica de documento legal (tipo, nombre, entidad, vencimiento, recordatorio). | ⬜ | `/app/garaje/:id/documentos/nuevo` | `fragment_nuevo_documento.xml`, `NuevoDocumentoFragment.kt` |
-| 4.4 | Detalle de documento | Vista de un documento con sus datos, estado de vigencia y acciones. | ⬜ | `/app/documentos/:id` | `fragment_documento_detalle.xml`, `documents.html` |
+| 4.4 | Detalle de documento | Vista de un documento con sus datos, estado de vigencia y acciones. | 🟨 | `/app/documentos/detalle` (hoy específico de RTM, falta genérico + `:id`) | Frame Figma "Detalle Documento RTM" (`2:1410`), `documents.html` |
 | 4.5 | Documentos adicionales | Lista de otros documentos no obligatorios asociados a la moto. | ⬜ | `/app/garaje/:id/documentos` | `fragment_documentos_adicionales.xml` |
 | 4.6 | Documento personalizado | Crear un tipo de documento propio del usuario. | ⬜ | `/app/documentos/personalizado` | `custom-document.html` |
 
@@ -73,10 +80,10 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 
 | # | Vista | Descripción | Estado | Ruta Ionic | Fuente |
 |---|---|---|---|---|---|
-| 5.1 | Registro de combustible / tanqueada | Tipo de gasolina, costo, kilometraje, ubicación; selector de moto si hay varias. | ⬜ | `/app/combustible/nuevo` | `fragment_combustible.xml`, `fuel-register.html` |
-| 5.2 | Registro de mantenimiento | Tipo de servicio, fecha, kilometraje, costo, notas, "repetir cada X km". | ⬜ | `/app/mantenimiento/nuevo` | `fragment_mantenimiento.xml`, `maintenance.html` |
+| 5.1 | Registro de combustible / tanqueada | Tipo de gasolina, costo, kilometraje, ubicación; selector de moto si hay varias. | 🟨 | `/app/combustible/nuevo` | Frames Figma "Formulario de Combustible" (`2:2931`) / "Registro de Combustible" (`2:320`) |
+| 5.2 | Registro de mantenimiento | Tipo de servicio, fecha, kilometraje, costo, notas, "repetir cada X km". | 🟨 | `/app/mantenimiento/nuevo` | Frame Figma "Registro de Nueva Tarea" (`2:1028`) |
 | 5.3 | Selector de tipo de registro | Hoja/pantalla intermedia para elegir entre tanqueada o mantenimiento. | ⬜ | (modal desde FAB) | `AVANCES.md` (MEMORY, próximos pasos) |
-| 5.4 | Progreso de mantenimiento | Indicador de vida útil ("60% vida útil") por componente/servicio. | ⬜ | `/app/mantenimiento` | `AVANCES.md` |
+| 5.4 | Progreso de mantenimiento | Indicador de vida útil ("60% vida útil") por componente/servicio, con alertas. | 🟨 | `/app/mantenimiento` | Frame Figma "Mantenimiento y Alertas" (`2:2`) |
 
 ## 6. Historial
 
@@ -99,14 +106,14 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 
 | # | Vista | Descripción | Estado | Ruta Ionic | Fuente |
 |---|---|---|---|---|---|
-| 8.1 | Notificaciones — lista | Alertas de vencimiento de SOAT/RTM, recordatorios de mantenimiento, avisos; leídas/no leídas. | ⬜ | `/app/notificaciones` | `notifications.html`, `AVANCES.md` (tabla `notificaciones`) |
-| 8.2 | Notificaciones — vacío | Estado sin notificaciones. | ⬜ | `/app/notificaciones` | `notifications.html` |
+| 8.1 | Notificaciones — lista | Alertas de vencimiento de SOAT/RTM, recordatorios de mantenimiento, avisos; leídas/no leídas. | 🟨 | `/app/notificaciones` | Frame Figma "Notificaciones" (`7:3463`) |
+| 8.2 | Notificaciones — vacío | Estado sin notificaciones. | 🟨 | `/app/notificaciones` (misma vista, rama vacía) | Frame Figma "Notificaciones" (`7:3463`) |
 
 ## 9. Consejos para moteros
 
 | # | Vista | Descripción | Estado | Ruta Ionic | Fuente |
 |---|---|---|---|---|---|
-| 9.1 | Consejos — lista | Contenido tipo blog: categorías, tarjetas con título y tiempo de lectura. | ⬜ | `/app/consejos` | `tips.html`, `AVANCES.md` (tabla `consejos`) |
+| 9.1 | Consejos — lista | Contenido tipo blog: categorías, tarjetas con título y tiempo de lectura. | 🟨 | `/app/consejos` | Frame Figma "Consejos" (`7:3725`) |
 | 9.2 | Consejo — detalle / artículo | Lectura del artículo completo. | ⬜ | `/app/consejos/:id` | `tips.html`, `AVANCES.md` |
 
 ## 10. Perfil y configuración
@@ -115,7 +122,7 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 |---|---|---|---|---|---|
 | 10.1 | **Perfil** | Tarjeta de identidad (avatar, nombre, correo), accesos a ajustes y **cerrar sesión**. | ✅ | `/app/perfil` | `fragment_perfil.xml`, `profile.html` |
 | 10.2 | Editar datos personales | Formulario de edición de nombre, apellido, correo, foto de perfil. | ⬜ | `/app/perfil/editar` | `PerfilFragment.kt`, `profile.html` |
-| 10.3 | Configuración / Ajustes | Preferencias: notificaciones, biometría, tema, unidades, idioma. | ⬜ | `/app/perfil/ajustes` | `nav_header_main.xml`, `AVANCES.md` (fondo `#1e2124`) |
+| 10.3 | Configuración / Ajustes | Preferencias: notificaciones, biometría, tema, unidades, idioma. | 🟨 | `/app/perfil/ajustes` | Frame Figma "Configuración de Perfil" (`2:732`) |
 | 10.4 | Seguridad | Cambio de contraseña, activar biometría, cerrar sesión en todos los dispositivos. | ⬜ | `/app/perfil/seguridad` | `profile.html` |
 | 10.5 | Acerca de / Ayuda | Versión, términos, soporte. | ⬜ | `/app/perfil/acerca` | `nav_header_main.xml` |
 
@@ -139,15 +146,27 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 
 ---
 
-## Notas de reconciliación con Figma (pendiente)
+## Notas de reconciliación con Figma
 
-- El archivo original de Figma "RodApp" tiene **31 frames**; este inventario lista
-  ~50 entradas porque separa **estados** (vacío/lleno) y **componentes**. Al abrir
-  Figma hay que:
-  1. Confirmar nombres exactos de cada frame.
-  2. Marcar cuáles estados ya están dibujados y cuáles no.
-  3. Detectar vistas de Figma que no estén en esta lista (p. ej. pantallas de
-     error, permisos de ubicación, cámara para foto de moto, etc.).
+- **Hecho (2026-09-09):** se leyó la Page 1 del archivo Figma "RodApp" (32 frames,
+  nombres exactos) vía panel de capas — el MCP de Figma se agotó (plan Starter,
+  20 llamadas/mes). Listado completo y mapeo a rutas en
+  [`FIGMA-PAGE1-VISTAS.txt`](./FIGMA-PAGE1-VISTAS.txt). 13 vistas que no existían
+  se crearon como scaffold (🟨 en las tablas de arriba) y quedaron enrutadas.
+- **Pendiente:**
+  1. Abrir el detalle de cada frame nuevo (requiere recuperar cupo del MCP o
+     otra sesión de Chrome) y ajustar layout/copy a pixel-perfect — hoy son
+     scaffolds con datos de ejemplo, no calcos del diseño.
+  2. Averiguar qué es el frame sin nombre "Body" (`2:3245`).
+  3. Construir los estados "llenos" de Inicio (2.2), Garaje (3.2) e Historial
+     (6.2) y el estado "ruta seleccionada" del Mapa (7.3) — hoy son TODO dentro
+     de la vista existente, no vistas nuevas.
+  4. Conectar a Supabase los 4 formularios nuevos que solo validan y navegan
+     (combustible, mantenimiento, SOAT, RTM).
+  5. Revisar **Page 2** y **Page 3** del archivo Figma (no leídas aún).
+  6. Los frames "Notificación de RodApp Activo" (`2:255`) y "Widget en Pantalla
+     de Inicio" (`2:156`) son mockups de SO (notificación push / widget de
+     home), no vistas de la app — quedan fuera de este inventario.
 - Fuentes cruzadas usadas: `rodApp-santiago/app/src/main/res/layout/*.xml`,
   `rodApp-santiago/.../fragments/*.kt`, `rodapp-frontend/public_html/pages/*.html`,
   `AVANCES.md`.
