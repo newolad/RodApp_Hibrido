@@ -77,9 +77,14 @@ git push -u origin Oscar
 Placeholders comparten `SectionPlaceholderComponent` (coherencia visual).
 
 ### 2.4 Backend (carpeta `supabase/`)
-- `config.toml` (Auth, redirects web + deep link, provider Google), `migrations/`,
-  `functions/`, `seed.sql`, `README.md` con el esquema esperado.
-- **Sin SQL todavía**, por diseño.
+- `config.toml` (Auth, redirects web + deep link, provider Google), `functions/`,
+  `seed.sql`, `README.md`.
+- **Migración inicial creada** (`migrations/20260911000000_esquema_inicial.sql`):
+  9 tablas (`users`, `motos`, `soat`, `rtm`, `documentos`,
+  `registros_combustible`, `registros_mantenimiento`, `notificaciones`,
+  `consejos`), RLS en todas y trigger `on_auth_user_created` para el perfil.
+  **Falta aplicarla** al proyecto en la nube (`supabase link` + `supabase db push`,
+  ver `supabase/README.md`).
 
 ### 2.5 Figma — mockups
 - **Archivo nuevo creado:** `RodApp Híbrido — Mockups`
@@ -111,11 +116,12 @@ Placeholders comparten `SectionPlaceholderComponent` (coherencia visual).
 3. **Enlace del Figma original "RodApp" (31 frames)** para completar/validar
    `mockups/VISTAS.md`. No hay forma de encontrarlo sin la URL.
 
-### Backend Supabase (pendiente, se verá "más adelante")
-- Migración inicial con **RLS**: `users`, `motos`, `soat`, `rtm`, `documentos`,
-  `registros_combustible`, `registros_mantenimiento`.
-- Trigger `on auth.users insert` → fila en `users` (hoy lo hace el cliente).
-- Tablas nuevas del alcance Figma: `notificaciones`, `consejos`.
+### Backend Supabase
+- ✅ Migración inicial escrita (§2.4). **Pendiente aplicarla** con
+  `supabase db push` (o pegarla en el SQL Editor del dashboard).
+- Pendiente: conectar a las tablas reales los 4 formularios que hoy solo
+  validan y navegan (combustible, mantenimiento, SOAT, RTM) y los scaffolds
+  de detalle/notificaciones/consejos.
 - Poner URL + `anon key` reales en `src/environments/environment*.ts`
   (ahora usan las del proyecto Supabase del RodApp original).
 - En el panel de Supabase: registrar Redirect URLs y habilitar Google.

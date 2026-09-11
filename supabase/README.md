@@ -4,8 +4,10 @@ Este proyecto usa **Supabase** como unico backend (Auth + Postgres + Storage).
 Aqui NO hay codigo de servidor propio: solo la configuracion del proyecto y el
 lugar donde viviran las migraciones SQL.
 
-> Estado actual: **sin contenido**. El esquema se definira en una etapa
-> posterior. El frontend ya está preparado para consumirlo.
+> Estado actual: migracion inicial creada en
+> `migrations/20260911000000_esquema_inicial.sql` con las 9 tablas, RLS y el
+> trigger de perfil. **Falta aplicarla** al proyecto en la nube (`supabase db
+> push`, ver abajo) — el frontend ya esta preparado para consumirla.
 
 ## Estructura
 
@@ -48,11 +50,13 @@ En **Dashboard > Authentication**:
 3. **Email**: `enable_confirmations` esta en `false` para agilizar pruebas;
    activarlo en produccion.
 
-## Esquema esperado por el frontend
+## Esquema (`20260911000000_esquema_inicial.sql`)
 
 El cliente (`src/app/core/services/supabase.service.ts`) ya referencia estas
-tablas. Las migraciones deberan crearlas **con RLS activado** y politicas que
-limiten cada fila a su `user_id` / `auth.uid()`:
+tablas. Todas tienen **RLS activado**, con politicas que limitan cada fila a
+su `user_id` / `auth.uid()` (para `soat`, `rtm`, `documentos` y los registros
+de operacion, la propiedad se resuelve via `es_dueno_de_moto(moto_id)`, que
+comprueba que la moto sea del usuario autenticado):
 
 | Tabla | Uso desde el frontend |
 |---|---|
@@ -63,7 +67,21 @@ limiten cada fila a su `user_id` / `auth.uid()`:
 | `documentos` | Otros documentos legales por moto. |
 | `registros_combustible` | Tanqueadas (`moto_id`, `costo`, `kilometraje`, ubicacion). |
 | `registros_mantenimiento` | Mantenimientos (`moto_id`, `tipo`, `fecha`, `kilometraje`). |
+| `notificaciones` | Alertas del usuario (vencimientos, recordatorios) — hoy consumidas como datos de ejemplo en `/app/notificaciones`. |
+| `consejos` | Contenido tipo blog, lectura publica para autenticados, escritura solo `rol = 'admin'` — hoy datos de ejemplo en `/app/consejos`. |
 
-> Recomendado: un trigger `on auth.users insert` que cree automaticamente la
-> fila en `users`. Mientras no exista, `AuthService` la crea desde el cliente
-> (`upsertPerfil`) tras el registro o el primer login con Google.
+Trigger `on_auth_user_created` (`handle_new_user()`) crea automaticamente la
+fila en `users` al registrarse. Es un respaldo: `AuthService` tambien la crea
+desde el cliente (`upsertPerfil`) tras el registro o el primer login con
+Google, por lo que el trigger usa `on conflict (id) do nothing`.
+
+### Aplicar la migracion
+
+```bash
+supabase link --project-ref erttcudseqjrpyathmal
+supabase db push
+```
+
+Pendiente tras aplicarla: conectar a estas tablas los 4 formularios que hoy
+solo validan y navegan (combustible, mantenimiento, SOAT, RTM) y las vistas
+con estado "con datos" (Inicio, Garaje, Historial).
