@@ -32,6 +32,8 @@ import {
   informationCircleOutline,
   shieldCheckmarkOutline,
   cloudOfflineOutline,
+  createOutline,
+  trashOutline,
 } from 'ionicons/icons';
 
 /**
@@ -78,6 +80,8 @@ export function registrarIconos(): void {
     'bulb-outline': bulbOutline,
     'settings-outline': settingsOutline,
     'chevron-forward-outline': chevronForwardOutline,
+    'create-outline': createOutline,
+    'trash-outline': trashOutline,
 
     // Feedback (toasts / estados)
     'alert-circle-outline': alertCircleOutline,

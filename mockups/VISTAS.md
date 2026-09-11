@@ -5,8 +5,12 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 > **Estado de este documento:** reconstruido a partir de la app Android
 > `rodApp-santiago` (que replica el diseño de Figma), del frontend web previo
 > (`rodapp-frontend`) y de las notas de alcance de `AVANCES.md`.
-> **Pendiente de validar contra el archivo original de Figma "RodApp" (31 frames)**
-> — falta el enlace de ese archivo.
+>
+> **Actualización 2026-09-09:** ya se leyó el archivo original de Figma "RodApp"
+> (`figma.com/design/ltX8Dlr5f7C1oNw3Heizfz`). El inventario literal de los
+> **32 frames de la Page 1** y su mapeo a rutas Ionic está en
+> [`FIGMA-PAGE1-VISTAS.txt`](./FIGMA-PAGE1-VISTAS.txt). Las vistas nuevas de ese
+> mapeo ya existen como scaffolds en `src/app/features/`.
 
 ## Leyenda de estado
 
