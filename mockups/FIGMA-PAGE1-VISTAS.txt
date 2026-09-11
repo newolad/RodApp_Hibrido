@@ -1,0 +1,94 @@
+RodApp — Figma · archivo "RodApp" · Page 1
+Fuente: https://www.figma.com/design/ltX8Dlr5f7C1oNw3Heizfz/RodApp  (node-id 7-3501)
+Leído: 2026-09-09 desde el panel de Capas (Layers) del editor web.
+Método: MCP de Figma agotado (plan Starter, asiento View = 20 llamadas/mes);
+        lista extraída del DOM del panel de capas vía Claude in Chrome.
+
+El archivo tiene 3 páginas: "Page 1" (esta), "Page 2", "Page 3".
+Page 1 contiene 32 frames de nivel superior. Listado en el orden del panel:
+
+=======================================================================
+ #   node-id     Nombre del frame en Figma
+=======================================================================
+  1  24:169      Historial vacío
+  2  24:4        Historial lleno
+  3  7:4394      Login exitoso
+  4  7:4289      sso
+  5  7:4219      login
+  6  7:4140      Garaje (Sin Documentos) 2
+  7  7:4036      Garaje (Sin Documentos) 1
+  8  7:3933      Garaje vacío 3
+  9  7:4336      sso confirmación
+ 10  7:3871      Crear Cuenta
+ 11  7:3725      Consejos
+ 12  7:3568      Inicio lleno
+ 13  7:3463      Notificaciones
+ 14  2:3245      Body                       (frame SIN NOMBRE en Figma — revisar)
+ 15  2:3138      Dashboard de Inicio MotoCare
+ 16  2:2931      Formulario de Combustible
+ 17  2:2833      Ruta seleccionada
+ 18  2:2687      Mapas
+ 19  2:2602      Plantilla reg RTM
+ 20  2:2517      Plantilla reg SOAT
+ 21  2:2293      Garaje lleno
+ 22  2:2219      Garaje vacio 1
+ 23  2:2111      Perfil
+ 24  2:2036      Inicio vacío
+ 25  2:1691      Garaje vacío 2
+ 26  2:1410      Detalle Documento RTM
+ 27  2:1028      Registro de Nueva Tarea
+ 28  2:732       Configuración de Perfil
+ 29  2:320       Registro de Combustible
+ 30  2:255       Notificación de RodApp Activo
+ 31  2:156       Widget en Pantalla de Inicio
+ 32  2:2         Mantenimiento y Alertas
+=======================================================================
+
+-----------------------------------------------------------------------
+MAPEO A VISTAS DE CÓDIGO (Ionic + Angular standalone)
+-----------------------------------------------------------------------
+Varios frames son ESTADOS o ITERACIONES del mismo screen; se consolidan
+en una sola vista de código. 2 frames no son pantallas de la app.
+
+Frame(s) de Figma                              Vista de código / ruta                       Estado
+---------------------------------------------  -------------------------------------------  ------------------
+login                                          /login  (features/auth/login)               ya existía (completa)
+Crear Cuenta                                   /registro  (features/auth/register)          ya existía (completa)
+Login exitoso                                  /login-exitoso  (auth/login-success)         NUEVA (scaffold)
+sso                                            /sso  (auth/sso)                             NUEVA (scaffold)
+sso confirmación                               /sso/confirmacion  (auth/sso-confirm)        NUEVA (scaffold)
+Inicio vacío                                   /app/inicio  (shell/home)                    ya existía
+Inicio lleno / Dashboard de Inicio MotoCare    /app/inicio  (estado con datos)             pendiente (misma vista)
+Garaje vacío 1/2/3 / Garaje vacio 1            /app/garaje  (shell/garage)                  ya existía (placeholder)
+Garaje lleno                                   /app/garaje  (estado con datos)              pendiente (misma vista)
+Garaje (Sin Documentos) 1/2                    /app/garaje/detalle  (shell/moto-detail)     NUEVA (scaffold)
+Plantilla reg SOAT                             /app/garaje/soat/nuevo  (shell/soat-form)    NUEVA (scaffold)
+Plantilla reg RTM                              /app/garaje/rtm/nuevo  (shell/rtm-form)      NUEVA (scaffold)
+Detalle Documento RTM                          /app/documentos/detalle (shell/document-detail) NUEVA (scaffold)
+Formulario de Combustible / Registro de Comb.  /app/combustible/nuevo  (shell/fuel-form)    NUEVA (scaffold)
+Mantenimiento y Alertas                        /app/mantenimiento  (shell/maintenance)      NUEVA (scaffold)
+Registro de Nueva Tarea                        /app/mantenimiento/nuevo (shell/maintenance-task-form) NUEVA (scaffold)
+Consejos                                       /app/consejos  (shell/tips)                  NUEVA (scaffold)
+Notificaciones                                 /app/notificaciones  (shell/notifications)   NUEVA (scaffold)
+Perfil                                         /app/perfil  (shell/profile)                 ya existía (completa)
+Configuración de Perfil                        /app/perfil/ajustes  (shell/profile-settings) NUEVA (scaffold)
+Mapas                                          /app/mapa  (shell/map)                       ya existía (placeholder)
+Ruta seleccionada                              /app/mapa  (estado con ruta)                 pendiente (misma vista)
+Historial vacío                                /app/historial  (shell/history)              ya existía (placeholder)
+Historial lleno                                /app/historial  (estado con datos)           pendiente (misma vista)
+Body (2:3245)                                  —                                           SIN NOMBRE: revisar en Figma
+Notificación de RodApp Activo                  —  (mockup de notificación del SO)           no es pantalla de app
+Widget en Pantalla de Inicio                   —  (mockup de widget de home)                no es pantalla de app
+
+-----------------------------------------------------------------------
+NOTAS
+-----------------------------------------------------------------------
+- Las vistas NUEVAS se crearon como scaffolds: estructura real (header,
+  contenido, formularios con ion-input, listas), enrutadas y con las
+  utilidades de estilo del proyecto (.rod-container, .rod-card, .rod-empty,
+  .rod-btn-primary). NO son pixel-perfect respecto a Figma porque no se
+  pudo abrir el detalle de cada frame (límite MCP + timeouts del navegador).
+- Los estados "lleno" de Inicio/Garaje/Historial y "ruta" de Mapa quedan
+  como TODO dentro de sus vistas existentes (no se duplican componentes).
+- Al recuperar acceso a Figma: abrir cada frame NUEVO y ajustar el layout;
+  confirmar qué es "Body" (2:3245).
