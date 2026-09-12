@@ -14,7 +14,13 @@
     "lint": "ng lint",
     "sync": "npm run build && cap sync",
     "android": "npm run build && cap sync android && cap open android",
-    "ios": "npm run build && cap sync ios && cap open ios"
+    "ios": "npm run build && cap sync ios && cap open ios",
+    "db:login": "supabase login",
+    "db:link": "supabase link --project-ref erttcudseqjrpyathmal",
+    "db:push": "supabase db push",
+    "db:diff": "supabase db diff",
+    "db:start": "supabase start",
+    "db:stop": "supabase stop"
   },
   "dependencies": {
     "@angular/animations": "^18.2.0",
@@ -55,6 +61,7 @@
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "supabase": "2.117.0",
     "typescript": "~5.5.4"
   }
 }

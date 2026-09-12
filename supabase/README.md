@@ -20,21 +20,32 @@ lugar donde viviran las migraciones SQL.
 
 ## Puesta en marcha
 
+La CLI ya está instalada como `devDependency` del proyecto (`npm install
+supabase --save-dev`), no hace falta instalarla global. Se usa con `npx
+supabase ...` o con los scripts de `package.json`:
+
 ```bash
-# 1. Instalar la CLI (una vez)
-npm install -g supabase
+# 1. Login (abre el navegador, requiere confirmar a mano)
+npm run db:login
 
 # 2. Enlazar con el proyecto en la nube (usa el Reference ID real)
-supabase login
-supabase link --project-ref erttcudseqjrpyathmal
+npm run db:link
 
-# 3. (Opcional) Entorno local con Docker
-supabase start
+# 3. Aplicar las migraciones pendientes de migrations/
+npm run db:push
 
-# 4. Crear y aplicar migraciones
-supabase migration new crear_esquema_inicial
-supabase db push
+# 4. Crear una migracion nueva
+npx supabase migration new nombre_de_la_migracion
+
+# 5. (Opcional, requiere Docker Desktop) entorno local con Postgres/Auth/Storage
+npm run db:start   # levanta los contenedores
+npm run db:diff    # compara el esquema local contra las migraciones
+npm run db:stop    # los apaga
 ```
+
+> `db:push`/`db:link`/`db:login` hablan directo con el proyecto en la nube y
+> **no necesitan Docker**. Docker solo hace falta para `db:start` (replica
+> local de Supabase) — ver el porque en la seccion de abajo.
 
 ## Autenticacion — configuracion en el panel
 
@@ -75,13 +86,33 @@ fila en `users` al registrarse. Es un respaldo: `AuthService` tambien la crea
 desde el cliente (`upsertPerfil`) tras el registro o el primer login con
 Google, por lo que el trigger usa `on conflict (id) do nothing`.
 
-### Aplicar la migracion
+Para aplicarla ver "Puesta en marcha" arriba (`npm run db:link` + `npm run
+db:push`). Pendiente despues: conectar a estas tablas los 4 formularios que
+hoy solo validan y navegan (combustible, mantenimiento, SOAT, RTM) y las
+vistas con estado "con datos" (Inicio, Garaje, Historial).
 
-```bash
-supabase link --project-ref erttcudseqjrpyathmal
-supabase db push
-```
+## Docker (opcional, solo para desarrollo local)
 
-Pendiente tras aplicarla: conectar a estas tablas los 4 formularios que hoy
-solo validan y navegan (combustible, mantenimiento, SOAT, RTM) y las vistas
-con estado "con datos" (Inicio, Garaje, Historial).
+Docker empaqueta un programa junto con todo lo que necesita para correr
+(sistema de archivos, librerias, configuracion) en un **contenedor**: una
+unidad aislada y reproducible que corre igual en cualquier maquina, sin
+"en mi PC funciona" y sin instalar Postgres/Auth/Storage a mano. Es mas
+liviano que una maquina virtual completa porque comparte el kernel del
+sistema operativo en vez de emular hardware.
+
+La CLI de Supabase usa Docker para `supabase start`: levanta contenedores
+con **Postgres + Auth (GoTrue) + Storage + Studio**, una copia local del
+proyecto de la nube. Sirve para:
+
+- Probar esta migracion (o una nueva) contra una base de datos real antes
+  de aplicarla al proyecto en produccion.
+- Desarrollar sin conexion y sin arriesgar los datos reales.
+- Ejecutar `supabase db diff` para generar el SQL de una migracion nueva
+  automaticamente, comparando el estado local contra las migraciones ya
+  aplicadas.
+
+**No es obligatorio**: `db:push`, `db:link` y `db:login` hablan directo con
+el proyecto en la nube (`erttcudseqjrpyathmal`) via su API, asi que se puede
+seguir trabajando sin Docker. Instalar Docker Desktop (Windows, con backend
+WSL2) solo vale la pena si el equipo quiere ese ciclo de prueba local antes
+de tocar produccion.
