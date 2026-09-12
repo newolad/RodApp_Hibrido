@@ -4,10 +4,11 @@ Este proyecto usa **Supabase** como unico backend (Auth + Postgres + Storage).
 Aqui NO hay codigo de servidor propio: solo la configuracion del proyecto y el
 lugar donde viviran las migraciones SQL.
 
-> Estado actual: migracion inicial creada en
+> Estado actual: migracion inicial en
 > `migrations/20260911000000_esquema_inicial.sql` con las 9 tablas, RLS y el
-> trigger de perfil. **Falta aplicarla** al proyecto en la nube (`supabase db
-> push`, ver abajo) — el frontend ya esta preparado para consumirla.
+> trigger de perfil, **ya aplicada** al proyecto en la nube (verificado con
+> `npx supabase migration list`). El frontend ya esta preparado para
+> consumirla.
 
 ## Estructura
 
@@ -25,11 +26,15 @@ supabase --save-dev`), no hace falta instalarla global. Se usa con `npx
 supabase ...` o con los scripts de `package.json`:
 
 ```bash
-# 1. Login (abre el navegador, requiere confirmar a mano)
-npm run db:login
+# 1. Login. `npm run db:login` abre el navegador, pero eso requiere una
+#    terminal interactiva (TTY) — si estas en un entorno sin eso (p.ej.
+#    Claude Code), usa un access token en su lugar:
+#    genera uno en supabase.com/dashboard/account/tokens y corre:
+npx supabase login --token TU_TOKEN --no-browser
 
-# 2. Enlazar con el proyecto en la nube (usa el Reference ID real)
-npm run db:link
+# 2. Enlazar con el proyecto en la nube (pide la contraseña de la BD si no
+#    se pasa por flag; resetearla en Project Settings > Database si hace falta)
+npx supabase link --project-ref erttcudseqjrpyathmal --password TU_PASSWORD
 
 # 3. Aplicar las migraciones pendientes de migrations/
 npm run db:push
