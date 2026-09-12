@@ -79,12 +79,16 @@ Placeholders comparten `SectionPlaceholderComponent` (coherencia visual).
 ### 2.4 Backend (carpeta `supabase/`)
 - `config.toml` (Auth, redirects web + deep link, provider Google), `functions/`,
   `seed.sql`, `README.md`.
-- **Migración inicial creada** (`migrations/20260911000000_esquema_inicial.sql`):
-  9 tablas (`users`, `motos`, `soat`, `rtm`, `documentos`,
-  `registros_combustible`, `registros_mantenimiento`, `notificaciones`,
-  `consejos`), RLS en todas y trigger `on_auth_user_created` para el perfil.
-  **Falta aplicarla** al proyecto en la nube (`supabase link` + `supabase db push`,
-  ver `supabase/README.md`).
+- **Migración inicial creada y ya aplicada** al proyecto en la nube
+  (`migrations/20260911000000_esquema_inicial.sql`): 9 tablas (`users`, `motos`,
+  `soat`, `rtm`, `documentos`, `registros_combustible`,
+  `registros_mantenimiento`, `notificaciones`, `consejos`), RLS en todas y
+  trigger `on_auth_user_created` para el perfil.
+- **CLI de Supabase integrada** como `devDependency` (`npx supabase`, scripts
+  `db:login`/`db:link`/`db:push`/`db:diff`/`db:start`/`db:stop` en
+  `package.json`). Login no interactivo con `--token` (el navegador no
+  funciona en este entorno sin TTY). Docker **no instalado** (no hace falta
+  para link/push, solo para `supabase start`; ver `supabase/README.md`).
 
 ### 2.5 Figma — mockups
 - **Archivo nuevo creado:** `RodApp Híbrido — Mockups`
@@ -117,8 +121,7 @@ Placeholders comparten `SectionPlaceholderComponent` (coherencia visual).
    `mockups/VISTAS.md`. No hay forma de encontrarlo sin la URL.
 
 ### Backend Supabase
-- ✅ Migración inicial escrita (§2.4). **Pendiente aplicarla** con
-  `supabase db push` (o pegarla en el SQL Editor del dashboard).
+- ✅ Migración inicial escrita y **aplicada** (§2.4).
 - Pendiente: conectar a las tablas reales los 4 formularios que hoy solo
   validan y navegan (combustible, mantenimiento, SOAT, RTM) y los scaffolds
   de detalle/notificaciones/consejos.
