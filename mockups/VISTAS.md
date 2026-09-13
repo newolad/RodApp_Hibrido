@@ -20,11 +20,11 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 | 🟨 | Vista en código como *placeholder* (sin contenido real ni mockup detallado) |
 | ⬜ | Pendiente (no existe ni mockup ni código) |
 
-**Resumen (2026-09-10):** 22 vistas abordadas (7 completas, 15 placeholder/scaffold) ·
-28 vistas pendientes. Las 15 en 🟨 incluyen las 13 vistas nuevas creadas a partir
-del inventario de `FIGMA-PAGE1-VISTAS.txt` (formularios y detalles con datos de
-ejemplo, sin persistencia en Supabase todavía) más los 2 estados agrupados en la
-misma vista de Notificaciones.
+**Resumen (2026-09-12):** 23 vistas abordadas (7 completas, 16 placeholder/scaffold) ·
+28 vistas pendientes. De las 16 en 🟨, **4 ya persisten datos reales en Supabase**
+(combustible, mantenimiento, SOAT, RTM) y el Garaje (3.2) ya lee/crea motos desde
+la tabla `motos` — falta ajustarlos pixel-perfect contra el Figma original. El
+resto sigue siendo scaffold con datos de ejemplo sin conectar.
 
 ---
 
@@ -59,8 +59,8 @@ misma vista de Notificaciones.
 | # | Vista | Descripción | Estado | Ruta Ionic | Fuente |
 |---|---|---|---|---|---|
 | 3.1 | **Garaje — vacío** | Estado vacío con CTA "Registrar moto". | ✅ | `/app/garaje` | `fragment_garaje.xml`, `garage.html` |
-| 3.2 | Garaje — con motos | Lista/galería de motos (foto, marca-modelo, placa, km) + botón añadir. | ⬜ | `/app/garaje` (estado lleno) | `fragment_garaje.xml`, `garage.html` |
-| 3.3 | Registrar moto | Formulario: marca, modelo, cilindrada, placa, color, odómetro inicial, foto. | ⬜ | `/app/garaje/nueva` | `fragment_registro_moto.xml`, `moto-register.html` |
+| 3.2 | Garaje — con motos | Lista/galería de motos (foto, marca-modelo, placa, km) + botón añadir. | 🟨 | `/app/garaje` (estado lleno) | `fragment_garaje.xml`, `garage.html` — lista simple ya lee de Supabase (`MotosService`); falta foto y diseño pixel-perfect |
+| 3.3 | Registrar moto | Formulario: marca, modelo, cilindrada, placa, odómetro inicial (sin foto por ahora). | 🟨 | `/app/garaje/nueva` | `fragment_registro_moto.xml`, `moto-register.html` — funcional y conectado a `motos`, sin mockup de Figma propio |
 | 3.4 | Detalle de moto | Ficha de la moto: datos, documentos, mantenimientos, combustible, editar/eliminar. | 🟨 | `/app/garaje/detalle` (falta id dinámico `:id`) | Frame Figma "Garaje (Sin Documentos) 1 y 2" (`7:4036`/`7:4140`), `moto-detail.html` |
 | 3.5 | Documentos de la moto | Sección dentro del detalle: SOAT, tecnomecánica y otros con su vigencia. | ⬜ | `/app/garaje/:id/documentos` | `fragment_garaje_documentos.xml` |
 | 3.6 | Editar moto | Formulario de edición de una moto existente. | ⬜ | `/app/garaje/:id/editar` | `RegistroMotoFragment.kt` (reutilizado) |
@@ -69,8 +69,8 @@ misma vista de Notificaciones.
 
 | # | Vista | Descripción | Estado | Ruta Ionic | Fuente |
 |---|---|---|---|---|---|
-| 4.1 | Registrar SOAT | Nº de póliza, aseguradora, fecha de inicio y de vencimiento. | 🟨 | `/app/garaje/soat/nuevo` (falta id de moto) | Frame Figma "Plantilla reg SOAT" (`2:2517`), `fragment_registro_soat.xml` |
-| 4.2 | Registrar RTM (tecnomecánica) | Nº de certificado, CDA, fecha de expedición y vencimiento. | 🟨 | `/app/garaje/rtm/nuevo` (falta id de moto) | Frame Figma "Plantilla reg RTM" (`2:2602`), `fragment_registro_rtm.xml` |
+| 4.1 | Registrar SOAT | Nº de póliza, aseguradora, fecha de inicio y de vencimiento. | 🟨 | `/app/garaje/soat/nuevo` | Frame Figma "Plantilla reg SOAT" (`2:2517`), `fragment_registro_soat.xml` — ya persiste en `soat`; falta pixel-perfect |
+| 4.2 | Registrar RTM (tecnomecánica) | Nº de certificado, CDA, fecha de expedición y vencimiento. | 🟨 | `/app/garaje/rtm/nuevo` | Frame Figma "Plantilla reg RTM" (`2:2602`), `fragment_registro_rtm.xml` — ya persiste en `rtm`; falta pixel-perfect |
 | 4.3 | Nuevo documento | Alta genérica de documento legal (tipo, nombre, entidad, vencimiento, recordatorio). | ⬜ | `/app/garaje/:id/documentos/nuevo` | `fragment_nuevo_documento.xml`, `NuevoDocumentoFragment.kt` |
 | 4.4 | Detalle de documento | Vista de un documento con sus datos, estado de vigencia y acciones. | 🟨 | `/app/documentos/detalle` (hoy específico de RTM, falta genérico + `:id`) | Frame Figma "Detalle Documento RTM" (`2:1410`), `documents.html` |
 | 4.5 | Documentos adicionales | Lista de otros documentos no obligatorios asociados a la moto. | ⬜ | `/app/garaje/:id/documentos` | `fragment_documentos_adicionales.xml` |
@@ -80,8 +80,8 @@ misma vista de Notificaciones.
 
 | # | Vista | Descripción | Estado | Ruta Ionic | Fuente |
 |---|---|---|---|---|---|
-| 5.1 | Registro de combustible / tanqueada | Tipo de gasolina, costo, kilometraje, ubicación; selector de moto si hay varias. | 🟨 | `/app/combustible/nuevo` | Frames Figma "Formulario de Combustible" (`2:2931`) / "Registro de Combustible" (`2:320`) |
-| 5.2 | Registro de mantenimiento | Tipo de servicio, fecha, kilometraje, costo, notas, "repetir cada X km". | 🟨 | `/app/mantenimiento/nuevo` | Frame Figma "Registro de Nueva Tarea" (`2:1028`) |
+| 5.1 | Registro de combustible / tanqueada | Tipo de gasolina, costo, kilometraje, ubicación; selector de moto si hay varias. | 🟨 | `/app/combustible/nuevo` | Frames Figma "Formulario de Combustible" (`2:2931`) / "Registro de Combustible" (`2:320`) — ya persiste en `registros_combustible`; falta pixel-perfect |
+| 5.2 | Registro de mantenimiento | Tipo de servicio, fecha, kilometraje, costo, notas, "repetir cada X km". | 🟨 | `/app/mantenimiento/nuevo` | Frame Figma "Registro de Nueva Tarea" (`2:1028`) — ya persiste en `registros_mantenimiento`; falta pixel-perfect |
 | 5.3 | Selector de tipo de registro | Hoja/pantalla intermedia para elegir entre tanqueada o mantenimiento. | ⬜ | (modal desde FAB) | `AVANCES.md` (MEMORY, próximos pasos) |
 | 5.4 | Progreso de mantenimiento | Indicador de vida útil ("60% vida útil") por componente/servicio, con alertas. | 🟨 | `/app/mantenimiento` | Frame Figma "Mantenimiento y Alertas" (`2:2`) |
 
@@ -153,16 +153,29 @@ misma vista de Notificaciones.
   20 llamadas/mes). Listado completo y mapeo a rutas en
   [`FIGMA-PAGE1-VISTAS.txt`](./FIGMA-PAGE1-VISTAS.txt). 13 vistas que no existían
   se crearon como scaffold (🟨 en las tablas de arriba) y quedaron enrutadas.
+- **Hecho (2026-09-12):** se creó y aplicó el esquema de Supabase (9 tablas +
+  RLS + trigger de perfil, ver `supabase/README.md`) y se conectaron los 4
+  formularios que antes solo validaban y navegaban: combustible → `registros_combustible`,
+  mantenimiento → `registros_mantenimiento`, SOAT → `soat`, RTM → `rtm`. Como
+  prerequisito (no había forma de crear una moto) se agregó `MotosService` y
+  la vista `/app/garaje/nueva`; el Garaje (3.2) ahora lista motos reales en
+  vez de ser un placeholder puro. Se ajustó el esquema sobre la marcha:
+  se agregaron las columnas `costo` (`registros_mantenimiento`) y `lugar`
+  (`registros_combustible`) que los formularios ya pedían mostraban en la UI
+  pero la migración inicial no contemplaba.
 - **Pendiente:**
   1. Abrir el detalle de cada frame nuevo (requiere recuperar cupo del MCP o
      otra sesión de Chrome) y ajustar layout/copy a pixel-perfect — hoy son
      scaffolds con datos de ejemplo, no calcos del diseño.
   2. Averiguar qué es el frame sin nombre "Body" (`2:3245`).
-  3. Construir los estados "llenos" de Inicio (2.2), Garaje (3.2) e Historial
-     (6.2) y el estado "ruta seleccionada" del Mapa (7.3) — hoy son TODO dentro
-     de la vista existente, no vistas nuevas.
-  4. Conectar a Supabase los 4 formularios nuevos que solo validan y navegan
-     (combustible, mantenimiento, SOAT, RTM).
+  3. Construir los estados "llenos" de Inicio (2.2) e Historial (6.2) y el
+     estado "ruta seleccionada" del Mapa (7.3) — hoy son TODO dentro de la
+     vista existente, no vistas nuevas. Garaje (3.2) ya tiene una version
+     minima funcional (ver arriba).
+  4. Hacer dinamico `moto-detail` (3.4) y `documentos/detalle` (4.4): hoy
+     siguen con datos de ejemplo hardcodeados y sin `:id` en la ruta, aunque
+     SOAT/RTM/combustible/mantenimiento ya guardan datos reales que esas
+     vistas todavia no leen.
   5. Revisar **Page 2** y **Page 3** del archivo Figma (no leídas aún).
   6. Los frames "Notificación de RodApp Activo" (`2:255`) y "Widget en Pantalla
      de Inicio" (`2:156`) son mockups de SO (notificación push / widget de

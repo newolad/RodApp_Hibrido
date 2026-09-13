@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -17,15 +17,16 @@ import {
   IonButton,
 } from '@ionic/angular/standalone';
 
+import { MotosService } from '@core/services/motos.service';
 import { NotificationService } from '@core/services/notification.service';
+import { SupabaseService } from '@core/services/supabase.service';
 
 /**
  * Frame Figma "Registro de Nueva Tarea" (2:1028).
  *
  * Alta de un mantenimiento/tarea: tipo de servicio, fecha, kilometraje, costo,
- * notas y "repetir cada X km".
- * Scaffold: formulario reactivo; guardado en Supabase (tabla `mantenimiento`)
- * como TODO.
+ * notas y "repetir cada X km". Se guarda en `registros_mantenimiento`,
+ * asociado a la moto activa del usuario (o a la elegida, si tiene mas de una).
  */
 @Component({
   selector: 'app-maintenance-task-form',
@@ -60,6 +61,24 @@ import { NotificationService } from '@core/services/notification.service';
     <ion-content [fullscreen]="true">
       <form class="rod-container" [formGroup]="form" (ngSubmit)="guardar()">
         <ion-list lines="none" class="campos">
+          @if (motosService.motos().length > 1) {
+            <ion-item class="rod-card">
+              <ion-select
+                formControlName="motoId"
+                label="Moto"
+                labelPlacement="stacked"
+                interface="action-sheet"
+                placeholder="Selecciona"
+              >
+                @for (moto of motosService.motos(); track moto.id) {
+                  <ion-select-option [value]="moto.id">
+                    {{ moto.marca }} {{ moto.modelo }} · {{ moto.placa }}
+                  </ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+          }
+
           <ion-item class="rod-card">
             <ion-select
               formControlName="tipo"
@@ -133,7 +152,7 @@ import { NotificationService } from '@core/services/notification.service';
           class="rod-btn-primary"
           type="submit"
           expand="block"
-          [disabled]="form.invalid"
+          [disabled]="form.invalid || guardando()"
         >
           Guardar tarea
         </ion-button>
@@ -154,14 +173,17 @@ import { NotificationService } from '@core/services/notification.service';
     `,
   ],
 })
-export class MaintenanceTaskFormPage {
+export class MaintenanceTaskFormPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly notify = inject(NotificationService);
   private readonly router = inject(Router);
+  private readonly supabase = inject(SupabaseService);
+  readonly motosService = inject(MotosService);
 
   readonly guardando = signal(false);
 
   readonly form = this.fb.nonNullable.group({
+    motoId: ['', [Validators.required]],
     tipo: ['', [Validators.required]],
     fecha: ['', [Validators.required]],
     kilometraje: [null as number | null, [Validators.required, Validators.min(0)]],
@@ -170,14 +192,45 @@ export class MaintenanceTaskFormPage {
     notas: [''],
   });
 
+  async ngOnInit(): Promise<void> {
+    await this.motosService.cargar();
+    const activa = this.motosService.motoActiva();
+    if (activa) this.form.patchValue({ motoId: activa.id });
+  }
+
   async guardar(): Promise<void> {
+    if (!this.motosService.motoActiva()) {
+      await this.notify.error('Primero registra una moto en el Garaje.');
+      await this.router.navigateByUrl('/app/garaje');
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       await this.notify.error('Completa los campos obligatorios.');
       return;
     }
-    // TODO: persistir en Supabase (tabla `mantenimiento`).
-    await this.notify.success('Tarea de mantenimiento registrada.');
-    await this.router.navigateByUrl('/app/mantenimiento');
+
+    const { motoId, tipo, fecha, kilometraje, costo, repetirCadaKm, notas } =
+      this.form.getRawValue();
+    this.guardando.set(true);
+    try {
+      const { error } = await this.supabase.registrarMantenimiento({
+        moto_id: motoId,
+        tipo,
+        fecha,
+        kilometraje: kilometraje!,
+        costo: costo ?? null,
+        repetir_cada_km: repetirCadaKm ?? null,
+        notas: notas || null,
+      });
+      if (error) throw error;
+      await this.notify.success('Tarea de mantenimiento registrada.');
+      await this.router.navigateByUrl('/app/mantenimiento');
+    } catch (error) {
+      await this.notify.error('No se pudo guardar la tarea. Intenta de nuevo.');
+      console.error('[MaintenanceTaskFormPage] guardar', error);
+    } finally {
+      this.guardando.set(false);
+    }
   }
 }

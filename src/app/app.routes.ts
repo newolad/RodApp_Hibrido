@@ -145,6 +145,14 @@ export const routes: Routes = [
           ),
       },
       {
+        // Alta de moto: prerequisito de combustible/mantenimiento/SOAT/RTM.
+        path: 'garaje/nueva',
+        loadComponent: () =>
+          import('./features/shell/moto-form/moto-form.page').then(
+            (m) => m.MotoFormPage,
+          ),
+      },
+      {
         // Frames "Garaje (Sin Documentos) 1 y 2" (detalle de moto)
         path: 'garaje/detalle',
         loadComponent: () =>

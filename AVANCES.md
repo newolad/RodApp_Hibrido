@@ -61,7 +61,11 @@ git push -u origin Oscar
 | Toasts/alertas/loading centralizados | `src/app/core/services/notification.service.ts` |
 | Validadores + mapeo de errores de Supabase a español | `src/app/shared/utils/` |
 
-### 2.3 Vistas en código (7 de ~40)
+### 2.3 Vistas en código
+Esta seccion quedo desactualizada frente al inventario real; el detalle
+completo y al dia (23 de ~50 vistas abordadas) esta en `mockups/VISTAS.md`.
+Resumen de lo mas relevante:
+
 | Vista | Ruta | Estado |
 |---|---|---|
 | Login | `/login` | ✅ completa (form reactivo + Google) |
@@ -69,7 +73,9 @@ git push -u origin Oscar
 | Callback OAuth | `/auth/callback` | ✅ (puente web) |
 | Shell de 5 tabs | `/app` | ✅ (Inicio·Garaje·Mapa·Historial·Perfil) |
 | Inicio | `/app/inicio` | 🟨 saludo real + estado vacío (falta estado "con datos") |
-| Garaje | `/app/garaje` | 🟨 placeholder |
+| Garaje | `/app/garaje` | 🟨 lista motos reales de Supabase (`MotosService`) o CTA "Registrar moto" |
+| Registrar moto | `/app/garaje/nueva` | 🟨 funcional, conectada a `motos` (prerequisito de los formularios de abajo) |
+| Combustible / Mantenimiento / SOAT / RTM (alta) | `/app/combustible/nuevo`, `/app/mantenimiento/nuevo`, `/app/garaje/soat/nuevo`, `/app/garaje/rtm/nuevo` | 🟨 **ya persisten en Supabase**; falta pixel-perfect contra Figma |
 | Mapa | `/app/mapa` | 🟨 placeholder |
 | Historial | `/app/historial` | 🟨 placeholder |
 | Perfil | `/app/perfil` | ✅ tarjeta de identidad + accesos + **cerrar sesión** |
@@ -121,10 +127,13 @@ Placeholders comparten `SectionPlaceholderComponent` (coherencia visual).
    `mockups/VISTAS.md`. No hay forma de encontrarlo sin la URL.
 
 ### Backend Supabase
-- ✅ Migración inicial escrita y **aplicada** (§2.4).
-- Pendiente: conectar a las tablas reales los 4 formularios que hoy solo
-  validan y navegan (combustible, mantenimiento, SOAT, RTM) y los scaffolds
-  de detalle/notificaciones/consejos.
+- ✅ Migración inicial escrita y **aplicada** (§2.4), más una segunda
+  migración (`20260912000000_ajustes_formularios.sql`) que agrega `costo` a
+  `registros_mantenimiento` y `lugar` a `registros_combustible`.
+- ✅ Los 4 formularios (combustible, mantenimiento, SOAT, RTM) y el alta de
+  moto ya persisten en Supabase real (`MotosService` + `SupabaseService`).
+- Pendiente: los scaffolds de detalle/notificaciones/consejos siguen con
+  datos de ejemplo (no leen de sus tablas todavía).
 - Poner URL + `anon key` reales en `src/environments/environment*.ts`
   (ahora usan las del proyecto Supabase del RodApp original).
 - En el panel de Supabase: registrar Redirect URLs y habilitar Google.

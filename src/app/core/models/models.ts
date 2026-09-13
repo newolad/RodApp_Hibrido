@@ -84,6 +84,7 @@ export interface CombustibleInsert {
   tipo_gasolina: string;
   costo: number;
   kilometraje: number;
+  lugar?: string | null;
   latitud?: number | null;
   longitud?: number | null;
 }
@@ -93,6 +94,7 @@ export interface MantenimientoInsert {
   tipo: string;
   fecha: string;
   kilometraje: number;
+  costo?: number | null;
   repetir_cada_km?: number | null;
   notas?: string | null;
 }

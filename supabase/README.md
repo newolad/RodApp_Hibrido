@@ -81,8 +81,8 @@ comprueba que la moto sea del usuario autenticado):
 | `soat` | Polizas SOAT por moto (`moto_id`, fechas de vigencia). |
 | `rtm` | Revision tecnico-mecanica por moto. |
 | `documentos` | Otros documentos legales por moto. |
-| `registros_combustible` | Tanqueadas (`moto_id`, `costo`, `kilometraje`, ubicacion). |
-| `registros_mantenimiento` | Mantenimientos (`moto_id`, `tipo`, `fecha`, `kilometraje`). |
+| `registros_combustible` | Tanqueadas (`moto_id`, `costo`, `kilometraje`, `lugar`, `latitud`/`longitud`). |
+| `registros_mantenimiento` | Mantenimientos (`moto_id`, `tipo`, `fecha`, `kilometraje`, `costo`). |
 | `notificaciones` | Alertas del usuario (vencimientos, recordatorios) — hoy consumidas como datos de ejemplo en `/app/notificaciones`. |
 | `consejos` | Contenido tipo blog, lectura publica para autenticados, escritura solo `rol = 'admin'` — hoy datos de ejemplo en `/app/consejos`. |
 
@@ -92,9 +92,17 @@ desde el cliente (`upsertPerfil`) tras el registro o el primer login con
 Google, por lo que el trigger usa `on conflict (id) do nothing`.
 
 Para aplicarla ver "Puesta en marcha" arriba (`npm run db:link` + `npm run
-db:push`). Pendiente despues: conectar a estas tablas los 4 formularios que
-hoy solo validan y navegan (combustible, mantenimiento, SOAT, RTM) y las
-vistas con estado "con datos" (Inicio, Garaje, Historial).
+db:push`).
+
+**Migracion `20260912000000_ajustes_formularios.sql`:** agrega `costo` a
+`registros_mantenimiento` y `lugar` a `registros_combustible` — columnas que
+los formularios ya mostraban en la UI pero la migracion inicial no tenia.
+
+Los 4 formularios (combustible, mantenimiento, SOAT, RTM) y el alta de moto
+(`/app/garaje/nueva`, prerequisito: todos requieren un `moto_id`) ya estan
+conectados a estas tablas. Pendiente: las vistas con estado "con datos"
+(Inicio, Historial) y hacer dinamico `moto-detail`/`documentos/detalle`
+(hoy siguen con datos de ejemplo).
 
 ## Docker (opcional, solo para desarrollo local)
 
