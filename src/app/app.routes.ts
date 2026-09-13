@@ -99,6 +99,14 @@ export const routes: Routes = [
 
       /* --- Vistas de detalle / formulario (frames de Figma, fuera de los 5 tabs) --- */
       {
+        // Editar datos personales (nombre/apellido)
+        path: 'perfil/editar',
+        loadComponent: () =>
+          import('./features/shell/profile-edit/profile-edit.page').then(
+            (m) => m.ProfileEditPage,
+          ),
+      },
+      {
         // Frame "Configuración de Perfil"
         path: 'perfil/ajustes',
         loadComponent: () =>

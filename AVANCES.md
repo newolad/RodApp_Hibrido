@@ -78,7 +78,8 @@ Resumen de lo mas relevante:
 | Combustible / Mantenimiento / SOAT / RTM (alta) | `/app/combustible/nuevo`, `/app/mantenimiento/nuevo`, `/app/garaje/soat/nuevo`, `/app/garaje/rtm/nuevo` | 🟨 **ya persisten en Supabase**; falta pixel-perfect contra Figma |
 | Mapa | `/app/mapa` | 🟨 placeholder |
 | Historial | `/app/historial` | 🟨 placeholder |
-| Perfil | `/app/perfil` | ✅ tarjeta de identidad + accesos + **cerrar sesión** |
+| Perfil | `/app/perfil` | ✅ tarjeta de identidad + **Editar datos** + **Ajustes** + cerrar sesión |
+| Editar datos personales | `/app/perfil/editar` | ✅ nombre/apellido, persiste en `users` |
 
 Placeholders comparten `SectionPlaceholderComponent` (coherencia visual).
 
@@ -127,16 +128,28 @@ Placeholders comparten `SectionPlaceholderComponent` (coherencia visual).
    `mockups/VISTAS.md`. No hay forma de encontrarlo sin la URL.
 
 ### Backend Supabase
-- ✅ Migración inicial escrita y **aplicada** (§2.4), más una segunda
-  migración (`20260912000000_ajustes_formularios.sql`) que agrega `costo` a
-  `registros_mantenimiento` y `lugar` a `registros_combustible`.
+- ✅ Migración inicial escrita y **aplicada** (§2.4), más dos migraciones de
+  ajuste: `20260912000000_ajustes_formularios.sql` (`costo` en
+  `registros_mantenimiento`, `lugar` en `registros_combustible`) y
+  `20260913000000_formaliza_ajustes_manuales.sql` (formaliza `updated_at` y
+  la placa unica en `motos` que se habian agregado a mano desde el panel).
 - ✅ Los 4 formularios (combustible, mantenimiento, SOAT, RTM) y el alta de
   moto ya persisten en Supabase real (`MotosService` + `SupabaseService`).
 - Pendiente: los scaffolds de detalle/notificaciones/consejos siguen con
   datos de ejemplo (no leen de sus tablas todavía).
 - Poner URL + `anon key` reales en `src/environments/environment*.ts`
   (ahora usan las del proyecto Supabase del RodApp original).
-- En el panel de Supabase: registrar Redirect URLs y habilitar Google.
+- **Pendiente (acción del usuario, fuera de este repo):** habilitar el login
+  con Google. Requiere:
+  1. Crear credenciales OAuth en Google Cloud Console (tipo "Aplicacion web",
+     redirect URI `https://erttcudseqjrpyathmal.supabase.co/auth/v1/callback`).
+  2. Pegar el Client ID y Client Secret en el Dashboard de Supabase >
+     Authentication > Providers > Google (habilitar el toggle).
+  3. Registrar en Authentication > URL Configuration > Redirect URLs:
+     `http://localhost:8100/auth/callback` y `com.rodapp.hibrido://auth/callback`.
+  El codigo (`AuthService.loginWithGoogle`) ya esta listo; esto es
+  configuracion externa que Claude no puede hacer sin las credenciales de
+  Google Cloud del usuario.
 
 ### Configuración nativa (cuando se compile a móvil)
 - `npx cap add android` / `npx cap add ios`.
