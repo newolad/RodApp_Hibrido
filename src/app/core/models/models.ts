@@ -44,10 +44,12 @@ export interface Moto {
   marca: string;
   modelo: string;
   cilindrada?: number | null;
-  placa: string;
+  placa: string; // unica en toda la tabla (una moto = una placa)
   odometro_inicial: number; // default 0
   foto_url?: string | null;
   activa: boolean; // default true
+  created_at?: string;
+  updated_at?: string;
 }
 
 /* =========================== Documentos ============================== */

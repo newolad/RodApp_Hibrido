@@ -180,6 +180,19 @@ export class AuthService {
     if (error) throw error;
   }
 
+  /* ============================ Perfil ============================= */
+
+  /** Actualiza nombre/apellido del perfil actual (tabla `users`) y refresca el signal local. */
+  async actualizarPerfil(cambios: { name: string; lastname?: string | null }): Promise<void> {
+    const userId = this._session()?.user.id;
+    if (!userId) throw new Error('No hay sesion activa.');
+
+    const { error } = await this.supabase.updatePerfil(userId, cambios);
+    if (error) throw error;
+
+    this._perfil.update((perfil) => (perfil ? { ...perfil, ...cambios } : perfil));
+  }
+
   /* ========================= Cerrar sesion ======================== */
 
   /**
