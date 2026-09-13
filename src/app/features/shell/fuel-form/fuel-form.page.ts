@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -16,15 +16,17 @@ import {
   IonButton,
 } from '@ionic/angular/standalone';
 
+import { MotosService } from '@core/services/motos.service';
 import { NotificationService } from '@core/services/notification.service';
+import { SupabaseService } from '@core/services/supabase.service';
 
 /**
  * Frames Figma "Formulario de Combustible" (2:2931) y "Registro de Combustible"
  * (2:320) — misma vista.
  *
  * Alta de una tanqueada: tipo de gasolina, costo, kilometraje y ubicacion.
- * Scaffold: formulario reactivo con validacion; el guardado en Supabase
- * (tabla `combustible`) queda como TODO.
+ * Se guarda en la tabla `registros_combustible`, asociada a la moto activa
+ * del usuario (o a la elegida, si tiene mas de una).
  */
 @Component({
   selector: 'app-fuel-form',
@@ -58,6 +60,24 @@ import { NotificationService } from '@core/services/notification.service';
     <ion-content [fullscreen]="true">
       <form class="rod-container" [formGroup]="form" (ngSubmit)="guardar()">
         <ion-list lines="none" class="campos">
+          @if (motosService.motos().length > 1) {
+            <ion-item class="rod-card">
+              <ion-select
+                formControlName="motoId"
+                label="Moto"
+                labelPlacement="stacked"
+                interface="action-sheet"
+                placeholder="Selecciona"
+              >
+                @for (moto of motosService.motos(); track moto.id) {
+                  <ion-select-option [value]="moto.id">
+                    {{ moto.marca }} {{ moto.modelo }} · {{ moto.placa }}
+                  </ion-select-option>
+                }
+              </ion-select>
+            </ion-item>
+          }
+
           <ion-item class="rod-card">
             <ion-select
               formControlName="tipoGasolina"
@@ -96,7 +116,7 @@ import { NotificationService } from '@core/services/notification.service';
 
           <ion-item class="rod-card">
             <ion-input
-              formControlName="ubicacion"
+              formControlName="lugar"
               label="Ubicacion / estacion"
               labelPlacement="stacked"
               placeholder="Opcional"
@@ -108,7 +128,7 @@ import { NotificationService } from '@core/services/notification.service';
           class="rod-btn-primary"
           type="submit"
           expand="block"
-          [disabled]="form.invalid"
+          [disabled]="form.invalid || guardando()"
         >
           Guardar
         </ion-button>
@@ -129,28 +149,59 @@ import { NotificationService } from '@core/services/notification.service';
     `,
   ],
 })
-export class FuelFormPage {
+export class FuelFormPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly notify = inject(NotificationService);
   private readonly router = inject(Router);
+  private readonly supabase = inject(SupabaseService);
+  readonly motosService = inject(MotosService);
 
   readonly guardando = signal(false);
 
   readonly form = this.fb.nonNullable.group({
+    motoId: ['', [Validators.required]],
     tipoGasolina: ['', [Validators.required]],
     costo: [null as number | null, [Validators.required, Validators.min(1)]],
     kilometraje: [null as number | null, [Validators.required, Validators.min(0)]],
-    ubicacion: [''],
+    lugar: [''],
   });
 
+  async ngOnInit(): Promise<void> {
+    await this.motosService.cargar();
+    const activa = this.motosService.motoActiva();
+    if (activa) this.form.patchValue({ motoId: activa.id });
+  }
+
   async guardar(): Promise<void> {
+    if (!this.motosService.motoActiva()) {
+      await this.notify.error('Primero registra una moto en el Garaje.');
+      await this.router.navigateByUrl('/app/garaje');
+      return;
+    }
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       await this.notify.error('Completa los campos obligatorios.');
       return;
     }
-    // TODO: persistir en Supabase (tabla `combustible`) via un servicio de dominio.
-    await this.notify.success('Tanqueada registrada.');
-    await this.router.navigateByUrl('/app/historial');
+
+    const { motoId, tipoGasolina, costo, kilometraje, lugar } = this.form.getRawValue();
+    this.guardando.set(true);
+    try {
+      const { error } = await this.supabase.registrarCombustible({
+        moto_id: motoId,
+        tipo_gasolina: tipoGasolina,
+        costo: costo!,
+        kilometraje: kilometraje!,
+        lugar: lugar || null,
+      });
+      if (error) throw error;
+      await this.notify.success('Tanqueada registrada.');
+      await this.router.navigateByUrl('/app/historial');
+    } catch (error) {
+      await this.notify.error('No se pudo guardar la tanqueada. Intenta de nuevo.');
+      console.error('[FuelFormPage] guardar', error);
+    } finally {
+      this.guardando.set(false);
+    }
   }
 }
