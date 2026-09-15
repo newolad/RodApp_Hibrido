@@ -25,8 +25,10 @@ que se despliega como **app móvil (Android / iOS)** y como **PWA web**.
 - Shell de navegación con las **5 pestañas** del mockup (Inicio · Garaje · Mapa ·
   Historial · Perfil). Cada vista existe **una sola vez**; las que aún no tienen
   datos comparten un componente de estado vacío para mantener la coherencia visual.
-- Carpeta `supabase/` con la configuración del backend (**sin esquema todavía**,
-  por diseño).
+- **Esquema de base de datos aplicado** en Supabase (9 tablas + RLS, ver
+  [`supabase/README.md`](supabase/README.md)). Alta de moto y los 4 formularios
+  de registro (combustible, mantenimiento, SOAT, RTM) ya persisten datos reales.
+- Edición de datos personales y pantalla de Ajustes del Perfil, funcionando.
 
 ## Requisitos
 
@@ -119,3 +121,8 @@ src/app/
 ## Estado y siguientes pasos
 
 Ver [`AVANCES.md`](AVANCES.md).
+
+## Contribuir
+
+¿Vas a sumarte al desarrollo? Ver [`CONTRIBUTING.md`](CONTRIBUTING.md) —
+cómo levantar el proyecto, flujo de ramas y pendientes conocidos.
