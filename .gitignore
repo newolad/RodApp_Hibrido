@@ -37,3 +37,6 @@ Thumbs.db
 
 # --- Repos anidados (proyecto Git independiente con su propio remoto) ---
 /Entrega_hibridas
+
+# --- Capturas/notas personales de depuracion (no forman parte del proyecto) ---
+/Correcciones
