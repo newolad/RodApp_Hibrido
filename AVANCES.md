@@ -5,7 +5,47 @@ reiniciar el equipo.
 
 - **Ubicación:** `C:\Users\EQUIPO\Documents\Ucompensar\7mo Semestre\Desarrollo apps hibridas\RodApp_Hibrido`
 - **Stack:** Ionic 8 (standalone) + Angular 18 (standalone, sin NgModules) + Capacitor 6 + Supabase (backend único). Estado con signals.
-- **Última actualización:** 2026-09-14
+- **Última actualización:** 2026-10-11
+
+---
+
+## 0. Bloqueador actual (2026-10-11) — el backend no responde
+
+Al probar el registro en el navegador (la prueba que venía pendiente desde el
+2026-09-13) la app devolvió **"Sin conexión con el servidor. Verifica tu
+internet."** — captura local en `Imagenes/Registro.png` (no versionada, ver §1).
+
+No es un bug de la app ni de la conexión del equipo: el proyecto Supabase al
+que apuntan `src/environments/environment.ts` y `environment.prod.ts` ya no
+existe. Comprobado el 2026-10-11 contra `/auth/v1/health`:
+
+| Proyecto | Respuesta |
+|---|---|
+| `erttcudseqjrpyathmal` — el que usa el código | ninguna; el dominio ni siquiera resuelve |
+| `smkhwldylnztluitsciz` — el que aparece en `.mcp.json` (sin commitear) | `401`, es decir vivo: solo pide `apikey` |
+
+Hay entonces un proyecto Supabase nuevo configurado para el MCP, pero **el
+código sigue apuntando al viejo** (falta confirmar si el nuevo es su
+reemplazo). Mientras eso no se corrija no funciona nada que toque la base de
+datos: ni registro, ni login, ni los 4 formularios, ni el alta de moto.
+
+### Para desbloquear
+1. Confirmar qué proyecto Supabase se usa de ahora en adelante.
+2. Poner su `url` + `anon key` en `src/environments/environment.ts` y en
+   `src/environments/environment.prod.ts`.
+3. Actualizar el ref viejo en los otros archivos donde quedó escrito:
+   `package.json` (script `db:link`), `supabase/README.md` y `CONTRIBUTING.md`.
+4. Aplicar las **3 migraciones** al proyecto nuevo: `npm run db:login` →
+   `npm run db:link` → `npm run db:push`. Sin esto las tablas no existen allí
+   y los formularios fallarán aunque la conexión ya funcione.
+5. Volver a registrar las *Redirect URLs* (`http://localhost:8100/auth/callback`
+   y `com.rodapp.hibrido://auth/callback`) en Authentication > URL Configuration.
+6. Solo entonces repetir la prueba de navegador descrita en §3.
+
+> **Para la próxima vez:** si vuelves a ver *"Sin conexión con el servidor"*,
+> revisa primero que el proyecto Supabase siga vivo
+> (`curl -i https://<ref>.supabase.co/auth/v1/health`) antes de buscar el error
+> en el código — el mensaje es genérico y apunta al lugar equivocado.
 
 ---
 
@@ -15,6 +55,11 @@ reiniciar el equipo.
 - **Rama de trabajo actual: `Oscar`**, ya subida y sincronizada con `origin/Oscar`.
 - `main` solo tiene el commit inicial del scaffold; el desarrollo real vive en `Oscar`.
 - Flujo de ramas y cómo abrir un PR: ver [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- **Queda fuera de los commits, a propósito:** `Imagenes/` (capturas de
+  depuración personales, igual que `Correcciones/`), `.mcp.json` (configuración
+  local del MCP de Supabase) y la línea `analytics` que la CLI de Angular
+  añadió sola a `angular.json` — es un id de telemetría de esta máquina, no
+  del proyecto.
 
 ---
 
@@ -107,13 +152,19 @@ Placeholders comparten `SectionPlaceholderComponent` (coherencia visual).
    reintentar cuando se reinicie el límite, exportarlos a mano desde Figma
    (seleccionar frames → panel Export → PNG 2x), o recortarlos del PNG general.
 2. **Probar en navegador los últimos cambios** (registro de moto, formularios,
-   edición de perfil): quedó pendiente por RAM baja en el equipo al momento de
-   implementarlos. Antes de dar por buena la conexión a Supabase conviene
-   correr `npm start` y probar el flujo real.
+   edición de perfil): se intentó el 2026-10-10 y **no se llegó a probar nada**
+   — el backend no responde (§0). La prueba sigue pendiente, pero ahora la
+   bloquea §0, no la RAM del equipo. Cuando se desbloquee, el recorrido es:
+   Garaje → Registrar moto → los 4 formularios → Perfil → Editar datos /
+   Ajustes.
 3. **Login con Google**: configuración externa pendiente (ver §3 "Backend
    Supabase" más abajo).
 
 ### Backend Supabase
+- 🔴 **El proyecto `erttcudseqjrpyathmal` dejó de responder (§0).** Todo lo que
+  sigue se escribió cuando ese proyecto estaba vivo: las migraciones están
+  aplicadas *allí*, no en el proyecto nuevo. Antes de seguir hay que repuntar
+  el código y volver a aplicarlas.
 - ✅ Migración inicial escrita y **aplicada** (§2.4), más dos migraciones de
   ajuste: `20260912000000_ajustes_formularios.sql` (`costo` en
   `registros_mantenimiento`, `lugar` en `registros_combustible`) y
@@ -128,7 +179,8 @@ Placeholders comparten `SectionPlaceholderComponent` (coherencia visual).
 - **Pendiente (acción del usuario, fuera de este repo):** habilitar el login
   con Google. Requiere:
   1. Crear credenciales OAuth en Google Cloud Console (tipo "Aplicacion web",
-     redirect URI `https://erttcudseqjrpyathmal.supabase.co/auth/v1/callback`).
+     redirect URI `https://<ref-del-proyecto>.supabase.co/auth/v1/callback`,
+     con el ref del proyecto que quede activo tras resolver §0).
   2. Pegar el Client ID y Client Secret en el Dashboard de Supabase >
      Authentication > Providers > Google (habilitar el toggle).
   3. Registrar en Authentication > URL Configuration > Redirect URLs:
@@ -160,8 +212,11 @@ Perfil: editar, ajustes, seguridad, acerca de (4) · Admin de usuarios (2).
 2. Verificar rama: `git branch` → debe estar en **`Oscar`**.
 3. (Si no se corrió el push) ejecutar los comandos de §1.
 4. `npm start` para levantar la app en web.
-5. Continuar por: subir a GitHub → esquema de Supabase → construir las vistas
-   pendientes siguiendo `mockups/VISTAS.md`.
+5. **Antes que nada, resolver §0** (el backend no responde); sin eso la app
+   arranca pero ninguna pantalla con datos sirve.
+6. Después, continuar por: vistas de lectura con datos reales (`moto-detail`,
+   `documentos/detalle`, Inicio e Historial "con datos", notificaciones y
+   consejos) siguiendo `mockups/VISTAS.md`.
 
 ## 5. Estructura del código
 

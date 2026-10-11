@@ -13,6 +13,10 @@ que se despliega como **app móvil (Android / iOS)** y como **PWA web**.
 
 ## Qué incluye esta entrega
 
+> **Nota (2026-10-11):** todo lo de abajo está implementado y compila, pero
+> ahora mismo **no se puede probar contra el backend** — ver el aviso de
+> *Puesta en marcha*.
+
 - Estructura completa del proyecto híbrido (web + móvil desde el mismo código).
 - **Autenticación con Supabase, funcionando de punta a punta:**
   - Registro con correo y contraseña (+ creación del perfil en la tabla `users`).
@@ -46,6 +50,14 @@ npm start            # http://localhost:8100
 Antes de probar el login, edita `src/environments/environment.ts` con la URL y la
 `anon key` de tu proyecto Supabase, y registra las *Redirect URLs* (ver
 `supabase/README.md`).
+
+> ⚠️ **El backend que viene configurado ya no responde.** Las credenciales
+> commiteadas apuntan al proyecto Supabase `erttcudseqjrpyathmal`, cuyo dominio
+> dejó de resolver (verificado el 2026-10-11). Mientras no se cambien, la app
+> muestra *"Sin conexión con el servidor"* en cualquier registro o inicio de
+> sesión. Hay que apuntar los dos `environment*.ts` a un proyecto vivo y volver
+> a aplicar las migraciones de `supabase/migrations/`.
+> Pasos exactos en [`AVANCES.md`](AVANCES.md) §0.
 
 ## Compilar y ejecutar en móvil
 
