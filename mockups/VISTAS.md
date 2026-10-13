@@ -16,7 +16,9 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 | 🟨 | Vista en código como *placeholder* (sin contenido real ni mockup detallado) |
 | ⬜ | Pendiente (no existe ni mockup ni código) |
 
-**Resumen:** 7 vistas abordadas (2 completas, 5 placeholder) · ~33 vistas pendientes.
+**Resumen:** las vistas de acceso, Garaje, Documentos e Historial tienen ya
+feedback/estados funcionales; Mapa conserva su placeholder y el resto del
+inventario sigue pendiente. La lámina de informe es un mockup, no una captura runtime.
 
 ---
 
@@ -47,12 +49,12 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 
 | # | Vista | Descripción | Estado | Ruta Ionic | Fuente |
 |---|---|---|---|---|---|
-| 3.1 | **Garaje — vacío** | Estado vacío con CTA "Registrar moto". | ✅ | `/app/garaje` | `fragment_garaje.xml`, `garage.html` |
-| 3.2 | Garaje — con motos | Lista/galería de motos (foto, marca-modelo, placa, km) + botón añadir. | ⬜ | `/app/garaje` (estado lleno) | `fragment_garaje.xml`, `garage.html` |
-| 3.3 | Registrar moto | Formulario: marca, modelo, cilindrada, placa, color, odómetro inicial, foto. | ⬜ | `/app/garaje/nueva` | `fragment_registro_moto.xml`, `moto-register.html` |
+| 3.1 | **Garaje — vacío** | Estado vacío con CTA "Registrar moto". | ✅ | `/app/garaje` | Ionic + `fragment_garaje.xml` |
+| 3.2 | Garaje — con motos | Lista de motos con marca/modelo, placa y km; editar, borrar y botón añadir. | ✅ | `/app/garaje` | Ionic + `fragment_garaje.xml` |
+| 3.3 | Registrar / editar moto | Modal con marca, modelo, cilindrada, placa y odómetro inicial validados. | ✅ | Modal desde `/app/garaje` | Ionic |
 | 3.4 | Detalle de moto | Ficha de la moto: datos, documentos, mantenimientos, combustible, editar/eliminar. | ⬜ | `/app/garaje/:id` | `moto-detail.html` |
 | 3.5 | Documentos de la moto | Sección dentro del detalle: SOAT, tecnomecánica y otros con su vigencia. | ⬜ | `/app/garaje/:id/documentos` | `fragment_garaje_documentos.xml` |
-| 3.6 | Editar moto | Formulario de edición de una moto existente. | ⬜ | `/app/garaje/:id/editar` | `RegistroMotoFragment.kt` (reutilizado) |
+| 3.6 | Editar moto | Formulario de edición de una moto existente. | ✅ | Modal desde `/app/garaje` | Ionic |
 
 ## 4. Documentos legales
 
@@ -62,7 +64,7 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 | 4.2 | Registrar RTM (tecnomecánica) | Nº de certificado, CDA, fecha de expedición y vencimiento. | ⬜ | `/app/garaje/:id/rtm/nuevo` | `fragment_registro_rtm.xml`, `RegistroRTMFragment.kt` |
 | 4.3 | Nuevo documento | Alta genérica de documento legal (tipo, nombre, entidad, vencimiento, recordatorio). | ⬜ | `/app/garaje/:id/documentos/nuevo` | `fragment_nuevo_documento.xml`, `NuevoDocumentoFragment.kt` |
 | 4.4 | Detalle de documento | Vista de un documento con sus datos, estado de vigencia y acciones. | ⬜ | `/app/documentos/:id` | `fragment_documento_detalle.xml`, `documents.html` |
-| 4.5 | Documentos adicionales | Lista de otros documentos no obligatorios asociados a la moto. | ⬜ | `/app/garaje/:id/documentos` | `fragment_documentos_adicionales.xml` |
+| 4.5 | Documentos adicionales | Lista general de documentos, SOAT y RTM con vencimientos y estado vacío. | ✅ | `/app/documentos` | Ionic |
 | 4.6 | Documento personalizado | Crear un tipo de documento propio del usuario. | ⬜ | `/app/documentos/personalizado` | `custom-document.html` |
 
 ## 5. Registros de operación
@@ -78,8 +80,8 @@ Listado completo de pantallas que debe cubrir la app híbrida.
 
 | # | Vista | Descripción | Estado | Ruta Ionic | Fuente |
 |---|---|---|---|---|---|
-| 6.1 | **Historial — vacío** | Estado vacío ("Sin movimientos"). | ✅ | `/app/historial` | `fragment_historial.xml`, `history.html` |
-| 6.2 | Historial — con movimientos | Lista unificada de combustible + mantenimiento, ordenada por fecha, con importe. | ⬜ | `/app/historial` (estado lleno) | `HistorialFragment.kt`, `history.html` |
+| 6.1 | **Historial — vacío** | Estado vacío ("Sin movimientos"). | ✅ | `/app/historial` | Ionic + `fragment_historial.xml` |
+| 6.2 | Historial — con movimientos | Lista unificada de combustible + mantenimiento, ordenada por fecha, con importe. | ✅ | `/app/historial` (estado lleno) | Ionic |
 | 6.3 | Historial — filtros | Filtro por moto, por tipo (combustible/mantenimiento) y por rango de fechas. | ⬜ | `/app/historial` (filtros) | `history.html` |
 
 ## 7. Mapa

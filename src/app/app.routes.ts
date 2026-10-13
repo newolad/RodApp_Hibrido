@@ -60,6 +60,11 @@ export const routes: Routes = [
           import('./features/shell/garage/garage.page').then((m) => m.GaragePage),
       },
       {
+        path: 'documentos',
+        loadComponent: () =>
+          import('./features/shell/garage/documents.page').then((m) => m.DocumentsPage),
+      },
+      {
         path: 'mapa',
         loadComponent: () =>
           import('./features/shell/map/map.page').then((m) => m.MapPage),

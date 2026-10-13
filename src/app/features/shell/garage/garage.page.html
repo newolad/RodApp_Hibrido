@@ -1,0 +1,103 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-title>Garaje</ion-title>
+    <ion-button slot="end" fill="clear" routerLink="/app/documentos" aria-label="Ver documentos">
+      <ion-icon name="documents-outline" aria-hidden="true"></ion-icon>
+    </ion-button>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <main class="garage-page">
+    <header class="garage-heading">
+      <div>
+        <p class="eyebrow">MIS VEHÍCULOS</p>
+        <h1>Tu garaje</h1>
+        <p class="subtitle">Motos, kilometraje y documentos en un solo lugar.</p>
+      </div>
+      <ion-button class="add-button" shape="round" (click)="abrirNuevaMoto()" aria-label="Registrar moto">
+        <ion-icon slot="icon-only" name="add-outline" aria-hidden="true"></ion-icon>
+      </ion-button>
+    </header>
+
+    @if (motos().length) {
+      <section class="moto-list" aria-label="Motocicletas registradas">
+        @for (moto of motos(); track moto.id ?? moto.placa) {
+          <article class="moto-card">
+            <div class="moto-mark"><ion-icon name="bicycle-outline" aria-hidden="true"></ion-icon></div>
+            <div class="moto-info">
+              <h2>{{ moto.marca }} {{ moto.modelo }}</h2>
+              <p class="plate">{{ moto.placa }}</p>
+              <p class="odometer">{{ moto.odometro_inicial | number }} km <span>odómetro</span></p>
+            </div>
+            <div class="moto-actions">
+              <ion-button fill="clear" aria-label="Editar moto" (click)="abrirEdicion(moto)">
+                <ion-icon slot="icon-only" name="create-outline" aria-hidden="true"></ion-icon>
+              </ion-button>
+              <ion-button fill="clear" color="danger" aria-label="Eliminar moto" (click)="eliminarMoto(moto)">
+                <ion-icon slot="icon-only" name="trash-outline" aria-hidden="true"></ion-icon>
+              </ion-button>
+            </div>
+          </article>
+        }
+      </section>
+    } @else if (listaCargada()) {
+      <section class="empty-state">
+        <div class="empty-icon"><ion-icon name="bicycle-outline" aria-hidden="true"></ion-icon></div>
+        <h2>Tu garaje está vacío</h2>
+        <p>Registra tu moto para tener a mano su kilometraje y documentos.</p>
+        <ion-button class="rod-btn-primary" shape="round" (click)="abrirNuevaMoto()">
+          <ion-icon slot="start" name="add-outline" aria-hidden="true"></ion-icon>
+          Registrar moto
+        </ion-button>
+      </section>
+    } @else {
+      <section class="empty-state">
+        <div class="empty-icon"><ion-icon name="cloud-offline-outline" aria-hidden="true"></ion-icon></div>
+        <h2>No se pudo cargar el garaje</h2>
+        <p>Comprueba tu conexión e inténtalo de nuevo.</p>
+        <ion-button fill="outline" (click)="cargarMotos()">Reintentar</ion-button>
+      </section>
+    }
+  </main>
+</ion-content>
+
+<ion-modal [isOpen]="modalAbierto()" (didDismiss)="cerrarModal()" aria-label="Formulario de motocicleta">
+  <ng-template>
+    <ion-header class="ion-no-border">
+      <ion-toolbar>
+        <ion-title>{{ motoEditando() ? 'Editar moto' : 'Registrar moto' }}</ion-title>
+        <ion-button slot="end" fill="clear" (click)="cerrarModal()" aria-label="Cerrar">
+          <ion-icon slot="icon-only" name="close-outline" aria-hidden="true"></ion-icon>
+        </ion-button>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <form class="moto-form" [formGroup]="form" (ngSubmit)="guardarMoto()" novalidate>
+        <label for="marca">Marca</label>
+        <input id="marca" type="text" formControlName="marca" autocomplete="off" [class.invalid]="mostrarErrorCampo('marca')" />
+        @if (mostrarErrorCampo('marca')) { <small class="field-error">Ingresa una marca (mínimo 2 caracteres).</small> }
+
+        <label for="modelo">Modelo</label>
+        <input id="modelo" type="text" formControlName="modelo" autocomplete="off" [class.invalid]="mostrarErrorCampo('modelo')" />
+        @if (mostrarErrorCampo('modelo')) { <small class="field-error">Este campo es obligatorio.</small> }
+
+        <label for="placa">Placa</label>
+        <input id="placa" type="text" formControlName="placa" maxlength="8" autocapitalize="characters" [class.invalid]="mostrarErrorCampo('placa')" />
+        @if (mostrarErrorCampo('placa')) { <small class="field-error">Escribe una placa de 5 a 8 letras, números o guiones.</small> }
+
+        <label for="cilindrada">Cilindrada (cc)</label>
+        <input id="cilindrada" type="number" min="1" inputmode="numeric" formControlName="cilindrada" />
+        @if (form.controls.cilindrada.touched && form.controls.cilindrada.invalid) { <small class="field-error">La cilindrada debe ser mayor que cero.</small> }
+
+        <label for="kilometraje">Kilometraje inicial</label>
+        <input id="kilometraje" type="number" min="0" step="1" inputmode="numeric" formControlName="odometro_inicial" [class.invalid]="mostrarErrorCampo('odometro_inicial')" />
+        @if (mostrarErrorCampo('odometro_inicial')) { <small class="field-error">Ingresa un kilometraje entero igual o mayor que cero.</small> }
+
+        <ion-button class="rod-btn-primary submit-button" expand="block" type="submit">
+          {{ motoEditando() ? 'Guardar cambios' : 'Registrar moto' }}
+        </ion-button>
+      </form>
+    </ion-content>
+  </ng-template>
+</ion-modal>

@@ -88,6 +88,11 @@
   flex-direction: column;
   gap: 8px;
 }
+.field-error {
+  padding: 0 4px;
+  color: var(--ion-color-danger);
+  font-size: 12px;
+}
 .field-label {
   font-family: var(--rod-font-body);
   font-weight: 500;

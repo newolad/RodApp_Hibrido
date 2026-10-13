@@ -26,8 +26,19 @@ export function mensajeErrorAuth(error: unknown): string {
   if (raw.includes('rate limit') || raw.includes('too many requests')) {
     return 'Demasiados intentos. Espera un momento e intenta de nuevo.';
   }
+  if (
+    (raw.includes('redirect') && (raw.includes('not allowed') || raw.includes('invalid') || raw.includes('mismatch'))) ||
+    raw.includes('redirect uri') ||
+    raw.includes('redirect_url') ||
+    raw.includes('redirect url')
+  ) {
+    return 'La URL de redirección no coincide con la configuración de Supabase. Revisa Auth > URL Configuration.';
+  }
+  if (raw.includes('err_name_not_resolved') || raw.includes('name not resolved') || raw.includes('dns')) {
+    return 'No se encuentra el servidor configurado. Verifica el Project URL de Supabase y tu DNS.';
+  }
   if (raw.includes('network') || raw.includes('failed to fetch')) {
-    return 'Sin conexion con el servidor. Verifica tu internet.';
+    return 'No se pudo conectar con Supabase. Verifica el Project URL y la clave anon del proyecto, además de tu conexión.';
   }
   if (raw.includes('popup') || raw.includes('cancelled') || raw.includes('canceled')) {
     return 'Inicio de sesion con Google cancelado.';

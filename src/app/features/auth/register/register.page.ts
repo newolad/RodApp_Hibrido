@@ -63,6 +63,7 @@ export class RegisterPage {
     }
 
     this.cargando.set(true);
+  const loading = await this.notify.showLoading('Creando cuenta...');
     try {
       const v = this.form.getRawValue();
       const { needsEmailConfirmation } = await this.auth.registerWithEmail({
@@ -82,6 +83,7 @@ export class RegisterPage {
     } catch (error) {
       await this.notify.error(mensajeErrorAuth(error));
     } finally {
+      await loading.dismiss();
       this.cargando.set(false);
     }
   }
@@ -89,11 +91,13 @@ export class RegisterPage {
   /** Registro/acceso directo con Google (mismo flujo que en login). */
   async registrarConGoogle(): Promise<void> {
     this.cargando.set(true);
+    const loading = await this.notify.showLoading('Conectando con Google...');
     try {
       await this.auth.loginWithGoogle();
     } catch (error) {
       await this.notify.error(mensajeErrorAuth(error));
     } finally {
+      await loading.dismiss();
       this.cargando.set(false);
     }
   }

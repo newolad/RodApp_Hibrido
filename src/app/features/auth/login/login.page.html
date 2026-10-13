@@ -34,6 +34,9 @@
               formControlName="email"
             />
           </div>
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <span class="field-error">{{ form.controls.email.hasError('required') ? 'El correo es obligatorio.' : 'Escribe un correo válido.' }}</span>
+          }
         </div>
 
         <div class="field-group">
@@ -55,6 +58,9 @@
               (click)="togglePassword()"
             ></ion-icon>
           </div>
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <span class="field-error">{{ form.controls.password.hasError('required') ? 'La contraseña es obligatoria.' : 'Usa al menos 6 caracteres.' }}</span>
+          }
         </div>
 
         <a class="forgot-link" routerLink="/registro">Crear una cuenta nueva</a>

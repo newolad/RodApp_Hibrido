@@ -18,6 +18,7 @@
             <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
             <input id="nombre" type="text" placeholder="Carlos" formControlName="nombre" autocomplete="given-name" />
           </div>
+          @if (form.controls.nombre.touched && form.controls.nombre.invalid) { <span class="field-error">Escribe tu nombre (mínimo 2 caracteres).</span> }
         </div>
 
         <div class="field-group">
@@ -35,6 +36,7 @@
           <ion-icon name="mail-outline" aria-hidden="true"></ion-icon>
           <input id="email" type="email" inputmode="email" placeholder="tucorreo@ejemplo.com" formControlName="email" autocomplete="email" />
         </div>
+        @if (form.controls.email.touched && form.controls.email.invalid) { <span class="field-error">{{ form.controls.email.hasError('required') ? 'El correo es obligatorio.' : 'Escribe un correo válido.' }}</span> }
       </div>
 
       <div class="field-group">
@@ -65,6 +67,7 @@
           [class.invalid]="form.controls.confirmar.touched && (form.controls.confirmar.invalid || form.errors?.['noCoinciden'])"
         >
           <ion-icon name="lock-closed-outline" aria-hidden="true"></ion-icon>
+        @if (form.controls.password.touched && form.controls.password.invalid) { <span class="field-error">{{ form.controls.password.hasError('required') ? 'La contraseña es obligatoria.' : 'Usa al menos 6 caracteres.' }}</span> }
           <input
             id="confirmar"
             [type]="verPassword() ? 'text' : 'password'"

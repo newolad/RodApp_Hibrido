@@ -61,7 +61,7 @@ git push -u origin Oscar
 | Toasts/alertas/loading centralizados | `src/app/core/services/notification.service.ts` |
 | Validadores + mapeo de errores de Supabase a español | `src/app/shared/utils/` |
 
-### 2.3 Vistas en código (7 de ~40)
+### 2.3 Vistas en código (10 rutas/pantallas principales)
 | Vista | Ruta | Estado |
 |---|---|---|
 | Login | `/login` | ✅ completa (form reactivo + Google) |
@@ -69,12 +69,15 @@ git push -u origin Oscar
 | Callback OAuth | `/auth/callback` | ✅ (puente web) |
 | Shell de 5 tabs | `/app` | ✅ (Inicio·Garaje·Mapa·Historial·Perfil) |
 | Inicio | `/app/inicio` | 🟨 saludo real + estado vacío (falta estado "con datos") |
-| Garaje | `/app/garaje` | 🟨 placeholder |
+| Garaje | `/app/garaje` | ✅ listado conectado, estado vacío, alta/edición en modal, borrado confirmado y validaciones |
+| Documentos | `/app/documentos` | ✅ lista de documentos, SOAT y RTM; estado vacío y errores con toast |
 | Mapa | `/app/mapa` | 🟨 placeholder |
-| Historial | `/app/historial` | 🟨 placeholder |
+| Historial | `/app/historial` | ✅ lista unificada de combustible/mantenimiento y estado vacío |
 | Perfil | `/app/perfil` | ✅ tarjeta de identidad + accesos + **cerrar sesión** |
 
-Placeholders comparten `SectionPlaceholderComponent` (coherencia visual).
+El feedback de autenticación y las consultas/acciones de listas usa `ion-loading`;
+los resultados y errores se muestran con toast. Login, registro y moto muestran
+validación inline. El esquema SQL y las políticas RLS aún deben existir en Supabase.
 
 ### 2.4 Backend (carpeta `supabase/`)
 - `config.toml` (Auth, redirects web + deep link, provider Google), `migrations/`,
@@ -97,6 +100,9 @@ Placeholders comparten `SectionPlaceholderComponent` (coherencia visual).
 | `mockups/VISTAS.md` | **Inventario completo** de ~50 vistas en 12 secciones, con estado (✅/🟨/⬜), ruta Ionic propuesta y fuente (archivo Android/web). Reconstruido de `rodApp-santiago` + frontend web + AVANCES; **pendiente validar contra el Figma original**. |
 | `mockups/informe/rodapp-vistas-general.png` | Imagen 2216×2534 con las 7 vistas organizadas (para el informe). |
 | `mockups/manual/` | **Vacía.** Los 7 PNG por vista quedaron pendientes (ver §3). |
+
+La lámina existente es un mockup previo; no hay capturas runtime nuevas ni un
+archivo de diapositivas editable dentro del repositorio.
 
 ---
 

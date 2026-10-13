@@ -25,6 +25,12 @@ que se despliega como **app móvil (Android / iOS)** y como **PWA web**.
 - Shell de navegación con las **5 pestañas** del mockup (Inicio · Garaje · Mapa ·
   Historial · Perfil). Cada vista existe **una sola vez**; las que aún no tienen
   datos comparten un componente de estado vacío para mantener la coherencia visual.
+- Feedback de operaciones: `ion-loading` en autenticación y carga/guardado/borrado,
+  toast de éxito/error y validación visual de formularios.
+- Garaje conectado a Supabase: lista, alta y edición de motos en modal, borrado
+  confirmado, placa/kilometraje validados y estado vacío. Historial combina
+  combustible y mantenimiento; Documentos lista documentos, SOAT y RTM con su
+  estado vacío cuando no hay registros.
 - Carpeta `supabase/` con la configuración del backend (**sin esquema todavía**,
   por diseño).
 
@@ -44,6 +50,12 @@ npm start            # http://localhost:8100
 Antes de probar el login, edita `src/environments/environment.ts` con la URL y la
 `anon key` de tu proyecto Supabase, y registra las *Redirect URLs* (ver
 `supabase/README.md`).
+
+Las vistas de Garaje, Documentos e Historial necesitan que las tablas y políticas
+RLS de Supabase estén creadas. El repositorio aún no incluye las migraciones SQL;
+consulta [`supabase/README.md`](supabase/README.md) para el esquema esperado.
+La imagen [`mockups/informe/rodapp-vistas-general.png`](mockups/informe/rodapp-vistas-general.png)
+es una lámina de mockups, no una captura runtime de las nuevas pantallas.
 
 ## Compilar y ejecutar en móvil
 

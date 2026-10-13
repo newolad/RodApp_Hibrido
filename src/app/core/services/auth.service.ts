@@ -224,8 +224,11 @@ export class AuthService {
 
   /** Devuelve el redirect OAuth correcto segun la plataforma. */
   private redirectUrl(): string {
-    return Capacitor.isNativePlatform()
-      ? environment.auth.redirectNative
-      : environment.auth.redirectWeb;
+    if (Capacitor.isNativePlatform()) {
+      return environment.auth.redirectNative;
+    }
+
+    const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:8100';
+    return `${origin}/auth/callback`;
   }
 }

@@ -80,6 +80,10 @@ export class SupabaseService {
     return this.client.from('motos').update(cambios).eq('id', motoId);
   }
 
+  eliminarMoto(motoId: string, userId: string) {
+    return this.client.from('motos').delete().eq('id', motoId).eq('user_id', userId);
+  }
+
   /* ===================== Documentos legales ======================== */
 
   registrarSoat(soat: SoatInsert) {
