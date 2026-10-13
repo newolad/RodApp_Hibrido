@@ -21,6 +21,13 @@ export const routes: Routes = [
     redirectTo: 'app/inicio',
   },
 
+  {
+    // TEMPORAL: eliminar al terminar las pruebas del mapa sin autenticación.
+    path: 'mapa-demo',
+    loadComponent: () =>
+      import('./features/shell/map/map.page').then((m) => m.MapPage),
+  },
+
   /* ----------------------------- Auth ----------------------------- */
   {
     path: 'login',
