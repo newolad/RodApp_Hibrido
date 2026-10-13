@@ -5,7 +5,7 @@ reiniciar el equipo.
 
 - **Ubicación:** `C:\Users\EQUIPO\Documents\Ucompensar\7mo Semestre\Desarrollo apps hibridas\RodApp_Hibrido`
 - **Stack:** Ionic 8 (standalone) + Angular 18 (standalone, sin NgModules) + Capacitor 6 + Supabase (backend único). Estado con signals.
-- **Última actualización:** 2026-10-11
+- **Última actualización:** 2026-10-12
 
 ---
 
@@ -55,11 +55,18 @@ datos: ni registro, ni login, ni los 4 formularios, ni el alta de moto.
 - **Rama de trabajo actual: `Oscar`**, ya subida y sincronizada con `origin/Oscar`.
 - `main` solo tiene el commit inicial del scaffold; el desarrollo real vive en `Oscar`.
 - Flujo de ramas y cómo abrir un PR: ver [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- ⚠️ **El historial se reescribió el 2026-10-11.** Se limpiaron los mensajes
+  de los 16 commits (13 en `Oscar`, 3 en `main`) con `git filter-branch` para
+  quitarles una línea de atribución de herramienta, y se hizo **force-push a
+  las dos ramas**. Ningún archivo cambió de contenido, solo los mensajes, pero
+  **todos los SHAs son nuevos**. Si tienes un clon anterior **no hagas
+  `git pull`** (te mezclaría los dos historiales): usa
+  `git fetch && git reset --hard origin/<rama>` o vuelve a clonar.
 - **Queda fuera de los commits, a propósito:** `Imagenes/` (capturas de
-  depuración personales, igual que `Correcciones/`), `.mcp.json` (configuración
-  local del MCP de Supabase) y la línea `analytics` que la CLI de Angular
-  añadió sola a `angular.json` — es un id de telemetría de esta máquina, no
-  del proyecto.
+  depuración personales, igual que `Correcciones/`) y `.mcp.json`
+  (configuración local del MCP de Supabase — ver §3). El cambio que la CLI de
+  Angular había hecho sola en `angular.json` (un id de telemetría de esta
+  máquina) se descartó.
 
 ---
 
@@ -189,6 +196,51 @@ Placeholders comparten `SectionPlaceholderComponent` (coherencia visual).
   configuracion externa que Claude no puede hacer sin las credenciales de
   Google Cloud del usuario.
 
+### MCP de Supabase (integración a medias)
+El `.mcp.json` de la raíz configura el servidor MCP de Supabase para poder
+consultar la base directamente desde el asistente. **Todavía no funciona.**
+Estado al 2026-10-12:
+
+- Apunta a `smkhwldylnztluitsciz`, el proyecto que sí responde (§0).
+- `claude mcp list` lo reporta como `⏸ Pending approval`: un `.mcp.json` es de
+  ámbito proyecto y hay que aprobarlo una vez (basta lanzar `claude` dentro de
+  la carpeta y aceptar).
+- El login OAuth falla con
+  `{"message":"resource: Resource must be a valid MCP endpoint"}`. **No es un
+  error de configuración nuestro:** es un bug conocido — cuando la URL lleva
+  query string (`?project_ref=...&features=...`), el `resource` que manda el
+  cliente deja de coincidir con el endpoint registrado. Hay además reportes de
+  que falla en la extensión de VSCode y sí funciona desde la terminal.
+
+**Camino recomendado para cerrarlo** (evita OAuth por completo y conserva el
+scope de proyecto y el modo solo-lectura):
+
+1. Aprobar el servidor: `claude` en la carpeta del proyecto → aceptar.
+2. Crear un Personal Access Token en Supabase (Account > Access Tokens).
+3. Guardarlo en el entorno, **nunca dentro del archivo**:
+   `setx SUPABASE_ACCESS_TOKEN "sbp_..."`, y reabrir terminal y VSCode.
+4. Reemplazar el `.mcp.json` por la versión de abajo.
+5. Verificar con `claude mcp list`: debe decir `✔ Connected`.
+
+```json
+{
+  "mcpServers": {
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?project_ref=smkhwldylnztluitsciz&read_only=true",
+      "headers": { "Authorization": "Bearer ${SUPABASE_ACCESS_TOKEN}" }
+    }
+  }
+}
+```
+
+Con esa forma — `${SUPABASE_ACCESS_TOKEN}` como referencia, no el token
+literal — el `.mcp.json` sí se puede commitear sin filtrar credenciales.
+
+**Para qué lo queremos:** resolver las dos incógnitas que bloquean §0 — si el
+proyecto nuevo ya tiene las 9 tablas o está vacío, y obtener su `anon key`
+para repuntar los `environment*.ts`.
+
 ### Configuración nativa (cuando se compile a móvil)
 - `npx cap add android` / `npx cap add ios`.
 - Declarar el esquema `com.rodapp.hibrido://` en `AndroidManifest.xml` e
@@ -213,7 +265,9 @@ Perfil: editar, ajustes, seguridad, acerca de (4) · Admin de usuarios (2).
 3. (Si no se corrió el push) ejecutar los comandos de §1.
 4. `npm start` para levantar la app en web.
 5. **Antes que nada, resolver §0** (el backend no responde); sin eso la app
-   arranca pero ninguna pantalla con datos sirve.
+   arranca pero ninguna pantalla con datos sirve. El MCP de Supabase (§3)
+   ayuda a resolverlo, pero no es imprescindible: `npm run db:push` y el
+   dashboard hacen lo mismo a mano.
 6. Después, continuar por: vistas de lectura con datos reales (`moto-detail`,
    `documentos/detalle`, Inicio e Historial "con datos", notificaciones y
    consejos) siguiendo `mockups/VISTAS.md`.
