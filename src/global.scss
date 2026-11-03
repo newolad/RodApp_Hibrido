@@ -29,15 +29,24 @@ body {
   font-family: var(--rod-font-body);
   background: var(--rod-bg-base);
   color: var(--rod-text-heading);
+  margin: 0;
+  padding: 0;
 }
 
-/* Contenedor centrado y con ancho maximo: en web evita que el contenido
-   se estire en pantallas anchas y mantiene la sensacion "app movil". */
+/* En web el diseño ocupa la pantalla completa de forma natural y responsiva */
+ion-app {
+  width: 100%;
+  height: 100%;
+  background: var(--rod-bg-base);
+}
+
+/* Contenedor responsivo: en móvil es fluido y en web aprovecha el ancho
+   con un límite estético para que las tarjetas y contenidos no se deformen. */
 .rod-container {
   width: 100%;
-  max-width: 480px;
+  max-width: 960px;
   margin: 0 auto;
-  padding: 24px;
+  padding: 24px 20px;
   box-sizing: border-box;
 }
 

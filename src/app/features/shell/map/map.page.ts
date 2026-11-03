@@ -6,9 +6,11 @@ import {
   ElementRef,
   OnDestroy,
   ViewChild,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { AlertController, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
+import { Preferences } from '@capacitor/preferences';
 
 declare global {
   interface Window {
@@ -55,6 +57,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
   selectedRouteIndex = -1;
   routeMode = '';
   weatherResults: RainSegment[] = [];
+  forecastCheckedAt = '';
   reports: LocalReport[] = [];
   loadingMap = true;
   calculatingRoute = false;
@@ -72,6 +75,8 @@ export class MapPage implements AfterViewInit, OnDestroy {
   private reportMode = false;
   private mapClickListener: any;
   private destroyed = false;
+
+  private readonly alertController = inject(AlertController);
 
   constructor(private readonly cdr: ChangeDetectorRef) {}
 
@@ -116,6 +121,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
         if (this.reportMode) {
           this.addReport(point);
         } else if (this.pickMode) {
+          this.invalidateRouteResults();
           this.setEndpoint(this.pickMode, point);
           this.pickMode = null;
           this.status = 'Punto fijado. Completa el otro extremo o calcula la ruta.';
@@ -164,6 +170,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const point = { lat: position.coords.latitude, lng: position.coords.longitude };
+        this.invalidateRouteResults();
         this.setEndpoint('origin', point);
         this.map?.panTo(point);
         this.map?.setZoom(15);
@@ -178,6 +185,45 @@ export class MapPage implements AfterViewInit, OnDestroy {
       },
       { enableHighAccuracy: true, timeout: 12000 },
     );
+  }
+
+  onLocationInput(which: 'origin' | 'destination', value: string): void {
+    if (which === 'origin') this.originAddress = value;
+    else this.destinationAddress = value;
+    this.invalidateRouteResults();
+    this.status = 'Ubicaciones actualizadas. Calcula la ruta para ver el nuevo recorrido.';
+    this.refreshView();
+  }
+
+  swapLocations(): void {
+    const oldOriginAddress = this.originAddress;
+    const oldDestinationAddress = this.destinationAddress;
+    const oldOriginPoint = this.origin?.point ?? null;
+    const oldDestinationPoint = this.destination?.point ?? null;
+
+    this.invalidateRouteResults();
+    this.originAddress = oldDestinationAddress;
+    this.destinationAddress = oldOriginAddress;
+    if (oldDestinationPoint) this.setEndpoint('origin', oldDestinationPoint, false);
+    if (oldOriginPoint) this.setEndpoint('destination', oldOriginPoint, false);
+
+    this.status = 'Origen y destino intercambiados. Calcula la ruta para continuar.';
+    this.refreshView();
+  }
+
+  private invalidateRouteResults(): void {
+    this.clearMapOverlays();
+    this.removeEndpointMarker(this.origin);
+    this.removeEndpointMarker(this.destination);
+    this.origin = null;
+    this.destination = null;
+    this.route = null;
+    this.availableRoutes = [];
+    this.selectedRouteIndex = -1;
+    this.routeMode = '';
+    this.routeSummary = '';
+    this.weatherResults = [];
+    this.forecastCheckedAt = '';
   }
 
   private setEndpoint(which: 'origin' | 'destination', point: Point, updateInput = true): void {
@@ -216,6 +262,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
       return;
     }
 
+    this.invalidateRouteResults();
     this.calculatingRoute = true;
     this.status = 'Calculando una ruta para motocicleta…';
     this.refreshView();
@@ -330,6 +377,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
     this.map.fitBounds(bounds, { top: 50, right: 35, bottom: 40, left: 35 });
     this.routeSummary = `${this.formatDistance(selected)} · ${this.formatDuration(selected)} · ${this.routeMode}`;
     this.weatherResults = [];
+    this.forecastCheckedAt = '';
     if (notify) {
       this.status = `Mostrando ${this.routeName(index).toLowerCase()}. El pronóstico se calculará sobre esta ruta.`;
     }
@@ -367,6 +415,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
     this.analyzingRain = true;
     this.status = 'Consultando pronóstico horario en varios puntos de la ruta…';
     this.weatherResults = [];
+    this.forecastCheckedAt = '';
     this.clearRainMarkers();
     this.refreshView();
     try {
@@ -374,9 +423,8 @@ export class MapPage implements AfterViewInit, OnDestroy {
         lat: typeof p.lat === 'function' ? p.lat() : p.lat,
         lng: typeof p.lng === 'function' ? p.lng() : p.lng,
       }));
-      this.weatherResults = await Promise.all(
-        points.map((point, index) => this.forecastAt(point, index + 1)),
-      );
+      this.weatherResults = await this.forecastRoute(points);
+      this.forecastCheckedAt = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
       this.weatherResults.forEach((segment) => {
         const color = this.riskColor(segment.probability);
         this.rainMarkers.push(new window.google!.maps.Marker({
@@ -398,37 +446,43 @@ export class MapPage implements AfterViewInit, OnDestroy {
     } catch (error) {
       this.status = error instanceof Error
         ? `No se pudo consultar el pronóstico: ${error.message}`
-        : 'No se pudo consultar el pronóstico. Revisa la clave demo y la conexión.';
+        : 'No se pudo consultar el pronóstico. Revisa la conexión e intenta de nuevo.';
     } finally {
       this.analyzingRain = false;
       this.refreshView();
     }
   }
 
-  private async forecastAt(point: Point, number: number): Promise<RainSegment> {
-    const url = new URL('https://weather.googleapis.com/v1/forecast/hours:lookup');
-    url.searchParams.set('key', this.apiKey);
-    url.searchParams.set('location.latitude', String(point.lat));
-    url.searchParams.set('location.longitude', String(point.lng));
-    url.searchParams.set('hours', '3');
-    url.searchParams.set('pageSize', '3');
-    url.searchParams.set('languageCode', 'es');
+  private async forecastRoute(points: Point[]): Promise<RainSegment[]> {
+    const url = new URL('https://api.open-meteo.com/v1/forecast');
+    url.searchParams.set('latitude', points.map((point) => String(point.lat)).join(','));
+    url.searchParams.set('longitude', points.map((point) => String(point.lng)).join(','));
+    url.searchParams.set('hourly', 'precipitation_probability,precipitation,rain,showers,weather_code');
+    url.searchParams.set('forecast_hours', '3');
+    url.searchParams.set('timezone', 'America/Bogota');
+
     const response = await fetch(url);
-    if (!response.ok) throw new Error(`Weather API respondió ${response.status}.`);
-    const data = await response.json();
-    const hours: any[] = data.forecastHours ?? [];
-    const probability = Math.max(
-      0,
-      ...hours.map((hour) => Number(hour.precipitation?.probability?.percent ?? 0)),
-    );
-    const millimeters = hours.reduce(
-      (sum, hour) => sum + Number(hour.precipitation?.qpf?.quantity ?? 0),
-      0,
-    );
-    const raining = hours.some((hour) =>
-      /RAIN|SHOWERS|THUNDERSTORM/.test(hour.weatherCondition?.type ?? ''),
-    );
-    return { number, probability, millimeters, raining, point };
+    if (!response.ok) throw new Error(`Open-Meteo respondió ${response.status}.`);
+    const payload = await response.json();
+    const locations: any[] = Array.isArray(payload) ? payload : [payload];
+    if (locations.length !== points.length) {
+      throw new Error('El pronóstico no devolvió datos para todos los tramos.');
+    }
+
+    return locations.map((location, index) => {
+      const hourly = location.hourly ?? {};
+      const probabilities: number[] = hourly.precipitation_probability ?? [];
+      const precipitation: number[] = hourly.precipitation ?? [];
+      const rain: number[] = hourly.rain ?? [];
+      const showers: number[] = hourly.showers ?? [];
+      const weatherCodes: number[] = hourly.weather_code ?? [];
+      const probability = Math.max(0, ...probabilities.map((value) => Number(value ?? 0)));
+      const millimeters = precipitation.reduce((sum, value) => sum + Number(value ?? 0), 0);
+      const raining = rain.some((value) => Number(value) > 0)
+        || showers.some((value) => Number(value) > 0)
+        || weatherCodes.some((code) => (code >= 51 && code <= 67) || (code >= 80 && code <= 99));
+      return { number: index + 1, probability, millimeters, raining, point: points[index] };
+    });
   }
 
   private samplePath(path: any[], count: number): any[] {
@@ -454,54 +508,73 @@ export class MapPage implements AfterViewInit, OnDestroy {
   }
 
   private async addReport(point: Point): Promise<void> {
-    const kind = window.prompt(
-      '¿Qué quieres reportar? Escribe: Lluvia fuerte, Inundación, Vía bloqueada o Peligro',
-      'Lluvia fuerte',
-    );
     this.reportMode = false;
-    if (!kind?.trim()) {
+    const dialog = await this.alertController.create({
+      header: 'Reportar un punto',
+      message: 'Selecciona lo que ocurre en este lugar.',
+      inputs: [
+        { type: 'radio', label: 'Lluvia fuerte', value: 'Lluvia fuerte', checked: true },
+        { type: 'radio', label: 'Inundación', value: 'Inundación' },
+        { type: 'radio', label: 'Vía bloqueada', value: 'Vía bloqueada' },
+        { type: 'radio', label: 'Peligro', value: 'Peligro' },
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Guardar', role: 'confirm' },
+      ],
+    });
+    await dialog.present();
+    const { data, role } = await dialog.onDidDismiss();
+    const kind = role === 'confirm' ? (data?.values ?? 'Lluvia fuerte') : '';
+    if (!kind) {
       this.status = 'Reporte cancelado.';
       this.refreshView();
       return;
     }
+
     const report: LocalReport = {
-      kind: kind.trim().slice(0, 60),
+      kind: String(kind).trim().slice(0, 60),
       point,
       time: new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }),
       expiresAt: Date.now() + REPORT_TTL_MS,
     };
-    this.reports = [...this.readReports(), report];
-    this.saveReports();
-    this.status = 'Reporte guardado solo en este navegador; vence en 3 horas.';
+    this.reports = [...await this.readReports(), report];
+    await this.saveReports();
+    this.status = 'Reporte guardado en este dispositivo; vence en 3 horas.';
     this.renderReportMarkers();
     this.refreshView();
   }
 
   async removeReport(index: number): Promise<void> {
-    this.reports.splice(index, 1);
-    this.saveReports();
+    this.reports = this.reports.filter((_, currentIndex) => currentIndex !== index);
+    await this.saveReports();
     this.renderReportMarkers();
     this.refreshView();
   }
 
   private async refreshReports(): Promise<void> {
-    this.reports = this.readReports();
-    this.saveReports();
+    this.reports = await this.readReports();
+    await this.saveReports();
     this.renderReportMarkers();
     this.refreshView();
   }
 
-  private readReports(): LocalReport[] {
+  private async readReports(): Promise<LocalReport[]> {
     try {
-      const reports = JSON.parse(localStorage.getItem(REPORT_STORAGE_KEY) ?? '[]') as LocalReport[];
+      const { value } = await Preferences.get({ key: REPORT_STORAGE_KEY });
+      const reports = JSON.parse(value ?? '[]') as LocalReport[];
       return reports.filter((report) => report.expiresAt > Date.now());
     } catch {
       return [];
     }
   }
 
-  private saveReports(): void {
-    localStorage.setItem(REPORT_STORAGE_KEY, JSON.stringify(this.reports));
+  private async saveReports(): Promise<void> {
+    try {
+      await Preferences.set({ key: REPORT_STORAGE_KEY, value: JSON.stringify(this.reports) });
+    } catch (error) {
+      console.warn('No se pudieron guardar los reportes locales.', error);
+    }
   }
 
   private renderReportMarkers(): void {
@@ -538,20 +611,13 @@ export class MapPage implements AfterViewInit, OnDestroy {
   }
 
   clearRoute(): void {
-    this.clearMapOverlays();
-    this.removeEndpointMarker(this.origin);
-    this.removeEndpointMarker(this.destination);
-    this.origin = null;
-    this.destination = null;
-    this.route = null;
-    this.availableRoutes = [];
-    this.selectedRouteIndex = -1;
-    this.routeMode = '';
+    this.invalidateRouteResults();
     this.originAddress = '';
     this.destinationAddress = '';
-    this.routeSummary = '';
-    this.weatherResults = [];
+    this.pickMode = null;
+    this.reportMode = false;
     this.status = 'Recorrido limpio. Escribe un origen y un destino para empezar.';
+    this.refreshView();
   }
 
   private clearMapOverlays(): void {

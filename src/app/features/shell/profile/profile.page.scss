@@ -1,14 +1,39 @@
+.profile-toolbar {
+  --background: var(--rod-bg-base);
+  --color: var(--rod-text-heading);
+  padding: 8px 12px;
+}
+
+.profile-title {
+  font-family: var(--rod-font-heading);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  color: var(--rod-text-heading);
+  text-align: left;
+  padding-inline-start: 12px;
+}
+
+.profile-content {
+  --background: var(--rod-bg-base);
+}
+
 .perfil-card {
   display: flex;
   align-items: center;
   gap: 16px;
-  margin-top: 8px;
+  background: var(--rod-bg-alt);
+  border: 1px solid var(--rod-border);
+  border-radius: 16px;
+  padding: 18px;
+  margin-top: 10px;
+  margin-bottom: 24px;
 }
 
 .avatar {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--rod-radius-pill);
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
   background: var(--ion-color-primary);
   color: #ffffff;
   display: flex;
@@ -16,7 +41,7 @@
   justify-content: center;
   font-family: var(--rod-font-heading);
   font-weight: 700;
-  font-size: 22px;
+  font-size: 20px;
   overflow: hidden;
   flex-shrink: 0;
 
@@ -34,12 +59,12 @@
     margin: 0;
     font-family: var(--rod-font-heading);
     font-weight: 600;
-    font-size: 18px;
+    font-size: 17px;
     color: var(--rod-text-heading);
   }
   p {
     margin: 4px 0 0;
-    font-size: 14px;
+    font-size: 13px;
     color: var(--rod-text-secondary);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -48,51 +73,89 @@
 }
 
 .opciones {
-  margin-top: 20px;
-  padding: 4px;
+  background: var(--rod-bg-alt);
+  border: 1px solid var(--rod-border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 32px;
 }
 
 .opcion {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px 12px;
+  justify-content: space-between;
+  padding: 16px 18px;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--rod-border);
-  color: var(--rod-text-body);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  color: var(--rod-text-heading);
   font-family: var(--rod-font-body);
   font-size: 15px;
   text-align: left;
   cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.03);
+  }
 
   &:last-child {
     border-bottom: none;
   }
-  &:disabled {
-    opacity: 0.55;
-    cursor: default;
+
+  .opcion-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    ion-icon {
+      font-size: 20px;
+      color: var(--ion-color-primary);
+    }
   }
 
-  ion-icon {
-    font-size: 20px;
-    color: var(--ion-color-primary);
-    flex-shrink: 0;
-  }
-  span {
-    flex: 1;
-  }
   .chev {
-    color: var(--rod-text-muted);
     font-size: 16px;
+    color: var(--rod-text-muted);
   }
 }
 
-.logout-btn {
-  margin-top: 28px;
-  --border-radius: var(--rod-radius-pill);
+.logout-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+.logout-outline-btn {
+  width: 100%;
+  max-width: 320px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border-radius: var(--rod-radius-pill);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  background: transparent;
+  color: #ef4444;
   font-family: var(--rod-font-heading);
+  font-size: 15px;
   font-weight: 600;
-  text-transform: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  ion-icon {
+    font-size: 18px;
+  }
+
+  &:hover {
+    background: rgba(239, 68, 68, 0.1);
+    border-color: #ef4444;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
 }

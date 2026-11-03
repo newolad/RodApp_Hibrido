@@ -12,9 +12,9 @@ export const environment = {
   production: false,
 
   supabase: {
-    url: 'https://erttcudseqjrpyathmal.supabase.co',
+    url: 'https://smkhwldylnztluitsciz.supabase.co',
     anonKey:
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVydHRjdWRzZXFqcnB5YXRobWFsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MTUwMzUsImV4cCI6MjA5MTA5MTAzNX0.zmyADFrL2iPvGMhy9eU2SQ7VWZsF_h2E2D86RpMzgWA',
+      'sb_publishable_TSFfQV3-2h7Hv2vcbspPfQ_vr9V7134',
   },
 
   /**
@@ -23,7 +23,7 @@ export const environment = {
    *   Dashboard > Authentication > URL Configuration > Redirect URLs
    */
   auth: {
-    redirectWeb: 'http://localhost:8100/auth/callback',
+    redirectWeb: 'https://rodapp.example.com/auth/callback',
     redirectNative: 'com.rodapp.hibrido://auth/callback',
   },
 } as const;

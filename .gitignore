@@ -40,3 +40,4 @@ Thumbs.db
 
 # --- Capturas/notas personales de depuracion (no forman parte del proyecto) ---
 /Correcciones
+/src/assets/maps-config.local.json

@@ -10,7 +10,7 @@
           <span><i class="point-dot origin-dot"></i>Origen</span>
           <input
             [value]="originAddress"
-            (input)="originAddress = $any($event.target).value"
+            (input)="onLocationInput('origin', $any($event.target).value)"
             (keyup.enter)="calculateRoute()"
             autocomplete="street-address"
             placeholder="Mi ubicación o una dirección en Bogotá"
@@ -21,7 +21,7 @@
           <span><i class="point-dot destination-dot"></i>Destino</span>
           <input
             [value]="destinationAddress"
-            (input)="destinationAddress = $any($event.target).value"
+            (input)="onLocationInput('destination', $any($event.target).value)"
             (keyup.enter)="calculateRoute()"
             autocomplete="street-address"
             placeholder="Ej. Parque Simón Bolívar, Bogotá"
@@ -31,6 +31,7 @@
       </div>
 
       <div class="actions">
+        <button class="button" type="button" (click)="swapLocations()" [disabled]="calculatingRoute || loadingMap" aria-label="Intercambiar origen y destino">⇄ Intercambiar</button>
         <button class="button primary" type="button" (click)="calculateRoute()" [disabled]="calculatingRoute || loadingMap">
           {{ calculatingRoute ? 'Calculando…' : 'Calcular ruta' }}
         </button>
@@ -59,7 +60,7 @@
           <div class="map-loading"><span class="spinner"></span><span>Cargando mapa…</span></div>
         }
         <div #mapCanvas class="map-canvas" aria-label="Mapa interactivo de Bogotá"></div>
-        <div class="map-attribution">Google Maps · El clima es un pronóstico</div>
+        <div class="map-attribution">Google Maps · Pronóstico: Open-Meteo</div>
       </section>
 
       <aside class="details-column">
@@ -97,6 +98,9 @@
             <span class="rain-icon">☂</span>
           </div>
           <p class="muted">Probabilidad y milímetros estimados para las próximas 3 horas.</p>
+          @if (forecastCheckedAt) {
+            <p class="forecast-time" aria-live="polite">Consultado a las {{ forecastCheckedAt }}</p>
+          }
           <div class="legend">
             <span><i style="background:#25a875"></i>Baja</span>
             <span><i style="background:#d8a51d"></i>Media</span>
@@ -122,7 +126,7 @@
 
         <section class="card reports-card">
           <div class="section-title"><div><p class="eyebrow">COMUNIDAD</p><h2>Reportes cercanos</h2></div><span class="report-count">{{ reports.length }}</span></div>
-          <p class="muted">Los reportes son locales en este navegador y vencen en 3 horas.</p>
+          <p class="muted">Los reportes se guardan en este dispositivo y vencen en 3 horas.</p>
           @if (reports.length) {
             <div class="reports-list">
               @for (report of reports; track $index; let index = $index) {
@@ -134,7 +138,7 @@
           }
         </section>
 
-        <p class="disclaimer">Las rutas para moto de Google están en versión beta: confirma siempre la señalización y los cierres viales. La lluvia es un pronóstico por ubicación, no radar en vivo ni medición de pluviómetro. Los reportes se guardan localmente, no en Supabase.</p>
+        <p class="disclaimer">Las rutas para moto de Google están en versión beta: confirma siempre la señalización y los cierres viales. El pronóstico de lluvia usa Open-Meteo (datos CC BY 4.0); es una estimación, no radar en vivo ni medición de pluviómetro. Los reportes se guardan localmente en cada dispositivo; no se sincronizan entre equipos.</p>
       </aside>
     </div>
   </main>
