@@ -38,8 +38,14 @@
         <button class="button" type="button" (click)="useMyLocation()" [disabled]="loadingMap">Mi ubicación</button>
         <button class="button" type="button" (click)="chooseOnMap('origin')" [disabled]="loadingMap">Elegir origen en mapa</button>
         <button class="button" type="button" (click)="chooseOnMap('destination')" [disabled]="loadingMap">Elegir destino en mapa</button>
-        <button class="button" type="button" (click)="analyzeRain()" [disabled]="analyzingRain || !route">
-          {{ analyzingRain ? 'Analizando…' : '🌧 Analizar lluvia' }}
+        <button
+          class="button"
+          [class.primary]="route && !weatherResults.length"
+          type="button"
+          (click)="analyzeRain()"
+          [disabled]="analyzingRain || !route"
+        >
+          {{ analyzingRain ? 'Analizando clima…' : '🌧 Analizar lluvia en ruta' }}
         </button>
         <button class="button" type="button" (click)="enableReportMode()" [disabled]="loadingMap">⚠ Reportar punto</button>
         <button class="button quiet" type="button" (click)="clearRoute()">Limpiar</button>
@@ -48,8 +54,16 @@
       <p class="status" aria-live="polite">{{ status }}</p>
       @if (routeSummary) {
         <div class="route-summary" aria-live="polite">
-          <span class="summary-icon">↗</span>
-          <span><small>Distancia · tiempo estimado · tipo de ruta</small><strong>{{ routeSummary }}</strong></span>
+          <span class="summary-icon">🏍</span>
+          <div class="summary-details">
+            <div class="summary-title-row">
+              <span class="route-badge">Ruta activa seleccionada</span>
+              <strong class="route-main-metric">{{ routeSummary }}</strong>
+            </div>
+            <small class="route-help-text">
+              La línea resaltada en color <strong>cian (#11b4d4)</strong> es tu recorrido. Puedes tocar el botón "🌧 Analizar lluvia en ruta" para ver qué tramos estarán mojados.
+            </small>
+          </div>
         </div>
       }
     </section>
@@ -60,7 +74,6 @@
           <div class="map-loading"><span class="spinner"></span><span>Cargando mapa…</span></div>
         }
         <div #mapCanvas class="map-canvas" aria-label="Mapa interactivo de Bogotá"></div>
-        <div class="map-attribution">Google Maps · Pronóstico: Open-Meteo</div>
       </section>
 
       <aside class="details-column">

@@ -32,9 +32,14 @@ h1, h2, p { margin-top: 0; }
 .button.quiet { color: #b5c0cb; }
 .button:disabled { opacity: .48; cursor: not-allowed; }
 .status { min-height: 17px; margin: 11px 0 0; color: #aebbc8; font-size: 11px; line-height: 1.45; }
-.route-summary { display: flex; align-items: center; gap: 11px; padding: 12px; margin-top: 11px; border: 1px solid var(--rod-border-accent); border-radius: var(--rod-radius-card); background: var(--rod-accent-soft); }
-.summary-icon { display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 auto; border-radius: 50%; background: var(--map-accent); color: var(--ion-color-primary-contrast); font-size: 21px; font-weight: 800; }
-.route-summary small, .route-summary strong { display: block; }.route-summary small { color: #a9b8c5; font-size: 9px; }.route-summary strong { margin-top: 3px; font-size: 13px; line-height: 1.4; }
+.route-summary { display: flex; align-items: flex-start; gap: 14px; padding: 14px; margin-top: 12px; border: 1.5px solid var(--ion-color-primary); border-radius: var(--rod-radius-card); background: rgba(17, 180, 212, 0.08); }
+.summary-icon { display: grid; place-items: center; width: 40px; height: 40px; flex: 0 0 auto; border-radius: 50%; background: var(--ion-color-primary); color: #ffffff; font-size: 20px; }
+.summary-details { flex: 1; min-width: 0; }
+.summary-title-row { display: flex; flex-direction: column; gap: 4px; }
+.route-badge { display: inline-block; width: fit-content; padding: 2px 8px; border-radius: var(--rod-radius-pill); background: rgba(17, 180, 212, 0.2); color: var(--ion-color-primary); font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+.route-main-metric { font-size: 15px; color: var(--rod-text-heading); font-family: var(--rod-font-heading); font-weight: 700; margin-top: 2px; }
+.route-help-text { display: block; margin-top: 6px; font-size: 12px; line-height: 1.45; color: var(--rod-text-secondary); }
+.route-help-text strong { color: var(--ion-color-primary); }
 .content-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; align-items: start; gap: 14px; }
 .map-card { position: relative; min-width: 0; min-height: 450px; overflow: hidden; }
 .map-canvas { width: 100%; height: min(69vh, 720px); min-height: 450px; background: #dce5e9; }
@@ -96,6 +101,78 @@ h1, h2, p { margin-top: 0; }
   .button { min-height: 44px; }
   .route-option { min-height: 56px; }
   .forecast-time { margin: 5px 0 0; color: var(--map-muted); font-size: 10px; }
+
+/* Estilos de marcadores MapLibre de RodApp */
+.rod-map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2.5px solid #ffffff;
+  color: #ffffff;
+  font-family: var(--rod-font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+.marker-origin {
+  background: #16865f;
+}
+
+.marker-destination {
+  background: #c45537;
+}
+
+.marker-report {
+  background: #773db4;
+  font-size: 12px;
+}
+
+.marker-rain {
+  background: #11b4d4;
+  font-size: 10px;
+}
+
 }
 
 .forecast-time { margin: 5px 0 0; color: var(--map-muted); font-size: 10px; }
+
+/* Estilos de marcadores MapLibre de RodApp */
+.rod-map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2.5px solid #ffffff;
+  color: #ffffff;
+  font-family: var(--rod-font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+
+.marker-origin {
+  background: #16865f;
+}
+
+.marker-destination {
+  background: #c45537;
+}
+
+.marker-report {
+  background: #773db4;
+  font-size: 12px;
+}
+
+.marker-rain {
+  background: #11b4d4;
+  font-size: 10px;
+}
+

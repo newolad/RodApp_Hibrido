@@ -11,6 +11,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { AlertController, IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/angular/standalone';
 import { Preferences } from '@capacitor/preferences';
+import * as maplibregl from 'maplibre-gl';
 
 declare global {
   interface Window {
@@ -63,8 +64,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
   calculatingRoute = false;
   analyzingRain = false;
 
-  private apiKey = '';
-  private map: any;
+  private map: maplibregl.Map | null = null;
   private origin: Endpoint | null = null;
   private destination: Endpoint | null = null;
   route: any = null;
@@ -94,30 +94,52 @@ export class MapPage implements AfterViewInit, OnDestroy {
 
   private async initializeMap(): Promise<void> {
     try {
-      const configUrl = new URL('assets/maps-config.local.json', document.baseURI);
-      const response = await fetch(configUrl, { cache: 'no-store' });
-      if (!response.ok) {
-        throw new Error('Falta el archivo local assets/maps-config.local.json.');
-      }
-      const config = (await response.json()) as { apiKey?: string };
-      this.apiKey = config.apiKey?.trim() ?? '';
-      if (!this.apiKey) {
-        throw new Error('Agrega tu clave de demostración al archivo local de configuración.');
-      }
+      // Estilo directo estándar de OpenStreetMap (100% confiable y sin bloqueos)
+      const osmStyle: maplibregl.StyleSpecification = {
+        version: 8,
+        sources: {
+          'osm-tiles': {
+            type: 'raster',
+            tiles: [
+              'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+              'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+              'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            ],
+            tileSize: 256,
+            attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
+          },
+        },
+        layers: [
+          {
+            id: 'osm-tiles-layer',
+            type: 'raster',
+            source: 'osm-tiles',
+            minzoom: 0,
+            maxzoom: 19,
+          },
+        ],
+      };
 
-      await this.loadGoogleMapsScript();
-      const { Map } = await window.google!.maps.importLibrary('maps');
-      this.map = new Map(this.mapCanvas.nativeElement, {
-        center: BOGOTA,
-        zoom: 12,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: true,
-        clickableIcons: false,
+      this.map = new maplibregl.Map({
+        container: this.mapCanvas.nativeElement,
+        style: osmStyle,
+        center: [BOGOTA.lng, BOGOTA.lat],
+        zoom: 13,
+        attributionControl: false,
       });
-      this.mapClickListener = this.map.addListener('click', (event: any) => {
-        const point = event.latLng?.toJSON?.();
-        if (!point) return;
+
+      this.map.addControl(
+        new maplibregl.AttributionControl({
+          compact: false,
+          customAttribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors',
+        }),
+        'bottom-right'
+      );
+
+      this.map.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+
+      this.map.on('click', (event) => {
+        const point: Point = { lat: event.lngLat.lat, lng: event.lngLat.lng };
         if (this.reportMode) {
           this.addReport(point);
         } else if (this.pickMode) {
@@ -128,31 +150,26 @@ export class MapPage implements AfterViewInit, OnDestroy {
           this.refreshView();
         }
       });
-      this.loadingMap = false;
-      await this.refreshReports();
-      this.status = 'Mapa listo. Escribe las ubicaciones o selecciónalas sobre el mapa.';
+
+      this.map.on('load', async () => {
+        this.loadingMap = false;
+        await this.refreshReports();
+        this.status = 'Mapa listo (OpenStreetMap). Escribe las ubicaciones o selecciónalas sobre el mapa.';
+        this.refreshView();
+      });
+
+      // Si las teselas tardan, no bloqueamos la interfaz
+      setTimeout(() => {
+        if (this.loadingMap) {
+          this.loadingMap = false;
+          this.refreshView();
+        }
+      }, 1500);
     } catch (error) {
       this.loadingMap = false;
       this.status = error instanceof Error ? error.message : 'No se pudo iniciar el mapa.';
     }
     this.refreshView();
-  }
-
-  private async loadGoogleMapsScript(): Promise<void> {
-    if (window.google?.maps?.importLibrary) return;
-    await new Promise<void>((resolve, reject) => {
-      const script = document.createElement('script');
-      script.async = true;
-      script.defer = true;
-      script.dataset['rodappMaps'] = 'true';
-      script.src =
-        'https://maps.googleapis.com/maps/api/js?key=' +
-        encodeURIComponent(this.apiKey) +
-        '&v=weekly&language=es&region=CO';
-      script.onload = () => resolve();
-      script.onerror = () => reject(new Error('Google Maps no cargó. Revisa internet y la clave demo.'));
-      document.head.appendChild(script);
-    });
   }
 
   chooseOnMap(which: 'origin' | 'destination'): void {
@@ -172,8 +189,7 @@ export class MapPage implements AfterViewInit, OnDestroy {
         const point = { lat: position.coords.latitude, lng: position.coords.longitude };
         this.invalidateRouteResults();
         this.setEndpoint('origin', point);
-        this.map?.panTo(point);
-        this.map?.setZoom(15);
+        this.map?.flyTo({ center: [point.lng, point.lat], zoom: 15 });
         this.status = 'Ubicación actual asignada como origen.';
         this.refreshView();
       },
@@ -230,20 +246,14 @@ export class MapPage implements AfterViewInit, OnDestroy {
     const oldEndpoint = which === 'origin' ? this.origin : this.destination;
     this.removeEndpointMarker(oldEndpoint);
     const isOrigin = which === 'origin';
-    const marker = new window.google!.maps.Marker({
-      position: point,
-      map: this.map,
-      title: isOrigin ? 'Origen' : 'Destino',
-      label: { text: isOrigin ? 'A' : 'B', color: '#fff' },
-      icon: {
-        path: window.google!.maps.SymbolPath.CIRCLE,
-        scale: 13,
-        fillColor: isOrigin ? '#16865f' : '#c45537',
-        fillOpacity: 1,
-        strokeColor: '#fff',
-        strokeWeight: 3,
-      },
-    });
+    const el = document.createElement('div');
+    el.className = isOrigin ? 'rod-map-marker marker-origin' : 'rod-map-marker marker-destination';
+    el.innerText = isOrigin ? 'A' : 'B';
+
+    const marker = new maplibregl.Marker({ element: el })
+      .setLngLat([point.lng, point.lat])
+      .addTo(this.map!);
+
     const endpoint = { point, marker };
     if (isOrigin) this.origin = endpoint;
     else this.destination = endpoint;
@@ -254,79 +264,76 @@ export class MapPage implements AfterViewInit, OnDestroy {
     }
   }
 
+  private async resolvePoint(input: string | Point): Promise<Point> {
+    if (typeof input !== 'string') return input;
+    const trimmed = input.trim();
+    // Verifica si ya son coordenadas "lat, lng"
+    const match = trimmed.match(/^(-?\d+(\.\d+)?)\s*,\s*(-?\d+(\.\d+)?)$/);
+    if (match) {
+      return { lat: parseFloat(match[1]), lng: parseFloat(match[3]) };
+    }
+
+    // Geocodificación con Nominatim (OpenStreetMap) restringida a Colombia
+    const url = new URL('https://nominatim.openstreetmap.org/search');
+    url.searchParams.set('q', trimmed);
+    url.searchParams.set('format', 'json');
+    url.searchParams.set('limit', '1');
+    url.searchParams.set('countrycodes', 'co');
+
+    const res = await fetch(url, { headers: { 'Accept-Language': 'es' } });
+    if (!res.ok) throw new Error('Error al consultar el servicio de direcciones.');
+    const results = await res.json();
+    if (!results || results.length === 0) {
+      throw new Error(`No se encontró la dirección: "${trimmed}". Intenta con otra referencia.`);
+    }
+    return { lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) };
+  }
+
   async calculateRoute(): Promise<void> {
-    const origin = this.originAddress.trim() || this.origin?.point;
-    const destination = this.destinationAddress.trim() || this.destination?.point;
-    if (!origin || !destination) {
+    const rawOrigin = this.originAddress.trim() || this.origin?.point;
+    const rawDestination = this.destinationAddress.trim() || this.destination?.point;
+    if (!rawOrigin || !rawDestination) {
       this.status = 'Escribe el origen y el destino, o selecciónalos con los botones del mapa.';
       return;
     }
 
     this.invalidateRouteResults();
     this.calculatingRoute = true;
-    this.status = 'Calculando una ruta para motocicleta…';
+    this.status = 'Buscando ubicaciones y calculando ruta con OpenStreetMap…';
     this.refreshView();
-    try {
-      const { Route } = await window.google!.maps.importLibrary('routes');
-      const variants = [
-        {
-          travelMode: 'TWO_WHEELER',
-          routingPreference: 'TRAFFIC_AWARE',
-          computeAlternativeRoutes: true,
-          fields: ['path', 'distanceMeters', 'durationMillis', 'routeLabels'],
-          label: 'motocicleta con tráfico',
-        },
-        {
-          travelMode: 'TWO_WHEELER',
-          computeAlternativeRoutes: true,
-          fields: ['path', 'distanceMeters', 'durationMillis', 'routeLabels'],
-          label: 'motocicleta',
-        },
-        {
-          travelMode: 'DRIVE',
-          routingPreference: 'TRAFFIC_AWARE',
-          computeAlternativeRoutes: true,
-          fields: ['path', 'distanceMeters', 'durationMillis', 'routeLabels'],
-          label: 'conducción con tráfico',
-        },
-        {
-          travelMode: 'DRIVE',
-          computeAlternativeRoutes: true,
-          fields: ['path', 'distanceMeters', 'durationMillis', 'routeLabels'],
-          label: 'conducción',
-        },
-      ];
 
-      let result: any;
-      let routeMode = '';
-      for (const variant of variants) {
-        try {
-          const { label, ...request } = variant;
-          result = await Route.computeRoutes({ origin, destination, region: 'co', ...request });
-          if (result.routes?.length) {
-            routeMode = label;
-            break;
-          }
-        } catch (error) {
-          console.info(`No está disponible la opción ${variant.label}; probando alternativa.`, error);
-        }
-      }
-      if (!result?.routes?.length) {
-        throw new Error('Google no encontró ruta. Revisa la clave demo y las funciones habilitadas.');
+    try {
+      const originPoint = await this.resolvePoint(rawOrigin);
+      const destPoint = await this.resolvePoint(rawDestination);
+
+      this.setEndpoint('origin', originPoint, false);
+      this.setEndpoint('destination', destPoint, false);
+
+      // Consulta al motor de enrutamiento OSRM (OpenStreetMap)
+      const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${originPoint.lng},${originPoint.lat};${destPoint.lng},${destPoint.lat}?overview=full&geometries=geojson&alternatives=true`;
+      const response = await fetch(osrmUrl);
+      if (!response.ok) throw new Error('El servicio de rutas no respondió.');
+      const data = await response.json();
+
+      if (!data.routes || data.routes.length === 0) {
+        throw new Error('No se encontró una ruta vial entre los puntos.');
       }
 
       this.clearMapOverlays();
-      this.availableRoutes = result.routes;
-      const recommendedIndex = this.availableRoutes.findIndex((candidate: any) =>
-        candidate.routeLabels?.includes('DEFAULT_ROUTE'),
-      );
-      this.selectedRouteIndex = recommendedIndex >= 0 ? recommendedIndex : 0;
-      this.routeMode = routeMode;
+      this.availableRoutes = data.routes.map((r: any, idx: number) => ({
+        distanceMeters: r.distance,
+        durationMillis: r.duration * 1000,
+        path: r.geometry.coordinates.map((coords: [number, number]) => ({ lng: coords[0], lat: coords[1] })),
+        routeLabels: idx === 0 ? ['DEFAULT_ROUTE'] : [],
+      }));
+
+      this.selectedRouteIndex = 0;
+      this.routeMode = 'Ruta vial estándar (OpenStreetMap)';
       this.selectRoute(this.selectedRouteIndex, false);
       this.weatherResults = [];
       this.status = this.availableRoutes.length > 1
-        ? `Google encontró ${this.availableRoutes.length} rutas. Selecciona una para ver el recorrido y analizar la lluvia.`
-        : 'Ruta lista. Google no encontró alternativas para este trayecto; puedes analizar la lluvia.';
+        ? `Se encontraron ${this.availableRoutes.length} rutas. Selecciona una para ver el recorrido y analizar la lluvia.`
+        : 'Ruta lista. Puedes analizar la lluvia sobre el recorrido.';
     } catch (error) {
       this.status = error instanceof Error ? error.message : 'No se pudo calcular la ruta.';
     } finally {
@@ -342,39 +349,57 @@ export class MapPage implements AfterViewInit, OnDestroy {
     this.route = selected;
     this.clearMapOverlays();
 
-    // Dibuja primero las alternativas y la seleccionada encima, como en una app de navegación.
-    const order = this.availableRoutes.map((_: any, routeIndex: number) => routeIndex)
-      .filter((routeIndex: number) => routeIndex !== index)
-      .concat(index);
-    order.forEach((routeIndex: number) => {
-      const isSelected = routeIndex === index;
-      const lines = this.availableRoutes[routeIndex].createPolylines({
-        polylineOptions: {
-          map: this.map,
-          strokeColor: isSelected ? '#11b4d4' : '#7994a7',
-          strokeOpacity: isSelected ? 1 : 0.48,
-          strokeWeight: isSelected ? 7 : 4,
-          zIndex: isSelected ? 10 : 1,
-        },
+    // Dibuja las líneas de ruta en MapLibre mediante GeoJSON
+    if (this.map) {
+      this.availableRoutes.forEach((r, idx) => {
+        const isSelected = idx === index;
+        const sourceId = `route-source-${idx}`;
+        const layerId = `route-layer-${idx}`;
+
+        const geojson: any = {
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'LineString',
+                coordinates: r.path.map((p: any) => [p.lng, p.lat]),
+              },
+            },
+          ],
+        };
+
+        if (this.map!.getSource(sourceId)) {
+          (this.map!.getSource(sourceId) as maplibregl.GeoJSONSource).setData(geojson);
+        } else {
+          this.map!.addSource(sourceId, { type: 'geojson', data: geojson });
+          this.map!.addLayer({
+            id: layerId,
+            type: 'line',
+            source: sourceId,
+            layout: { 'line-join': 'round', 'line-cap': 'round' },
+            paint: {
+              'line-color': isSelected ? '#11b4d4' : '#8a99a8',
+              'line-width': isSelected ? 7 : 4,
+              'line-opacity': isSelected ? 1 : 0.45,
+            },
+          });
+        }
       });
-      this.routePolylines.push(...lines);
-    });
+    }
 
     const path: any[] = selected.path ?? [];
     if (!path.length) {
-      this.status = 'La ruta seleccionada no devolvió puntos para dibujarla.';
+      this.status = 'La ruta no devolvió puntos para dibujarla.';
       this.refreshView();
       return;
     }
-    const toPoint = (point: any): Point => ({
-      lat: typeof point.lat === 'function' ? point.lat() : point.lat,
-      lng: typeof point.lng === 'function' ? point.lng() : point.lng,
-    });
-    this.setEndpoint('origin', toPoint(path[0]), false);
-    this.setEndpoint('destination', toPoint(path[path.length - 1]), false);
-    const bounds = new window.google!.maps.LatLngBounds();
-    path.forEach((point: any) => bounds.extend(point));
-    this.map.fitBounds(bounds, { top: 50, right: 35, bottom: 40, left: 35 });
+
+    const bounds = new maplibregl.LngLatBounds();
+    path.forEach((p: any) => bounds.extend([p.lng, p.lat]));
+    this.map?.fitBounds(bounds, { padding: { top: 50, right: 35, bottom: 40, left: 35 } });
+
     this.routeSummary = `${this.formatDistance(selected)} · ${this.formatDuration(selected)} · ${this.routeMode}`;
     this.weatherResults = [];
     this.forecastCheckedAt = '';
@@ -420,27 +445,28 @@ export class MapPage implements AfterViewInit, OnDestroy {
     this.refreshView();
     try {
       const points = this.samplePath(this.route.path, 5).map((p: any) => ({
-        lat: typeof p.lat === 'function' ? p.lat() : p.lat,
-        lng: typeof p.lng === 'function' ? p.lng() : p.lng,
+        lat: p.lat,
+        lng: p.lng,
       }));
       this.weatherResults = await this.forecastRoute(points);
       this.forecastCheckedAt = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
       this.weatherResults.forEach((segment) => {
         const color = this.riskColor(segment.probability);
-        this.rainMarkers.push(new window.google!.maps.Marker({
-          position: segment.point,
-          map: this.map,
-          title: `Tramo ${segment.number}: probabilidad de lluvia ${segment.probability}%`,
-          icon: {
-            path: window.google!.maps.SymbolPath.CIRCLE,
-            scale: 11,
-            fillColor: color,
-            fillOpacity: 0.95,
-            strokeColor: '#fff',
-            strokeWeight: 3,
-          },
-          label: { text: String(segment.number), color: '#fff', fontSize: '10px', fontWeight: '700' },
-        }));
+        const el = document.createElement('div');
+        el.className = 'rod-map-marker marker-rain';
+        el.style.backgroundColor = color;
+        el.innerText = String(segment.number);
+
+        const popup = new maplibregl.Popup({ offset: 10 }).setHTML(
+          `<strong>Tramo ${segment.number}</strong><br>Probabilidad de lluvia: ${segment.probability}%<br>Precipitación: ${segment.millimeters.toFixed(1)} mm`
+        );
+
+        const marker = new maplibregl.Marker({ element: el })
+          .setLngLat([segment.point.lng, segment.point.lat])
+          .setPopup(popup)
+          .addTo(this.map!);
+
+        this.rainMarkers.push(marker);
       });
       this.status = 'Análisis listo: probabilidad máxima pronosticada durante las próximas 3 horas.';
     } catch (error) {
@@ -578,28 +604,23 @@ export class MapPage implements AfterViewInit, OnDestroy {
   }
 
   private renderReportMarkers(): void {
-    this.reportMarkers.forEach((marker) => marker.setMap(null));
+    this.reportMarkers.forEach((marker) => marker.remove?.());
     this.reportMarkers = [];
-    if (!this.map || !window.google) return;
+    if (!this.map) return;
     this.reports.forEach((report) => {
-      const marker = new window.google!.maps.Marker({
-        position: report.point,
-        map: this.map,
-        title: report.kind,
-        icon: {
-          path: window.google!.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-          scale: 5,
-          fillColor: '#773db4',
-          fillOpacity: 1,
-          strokeColor: '#fff',
-          strokeWeight: 1,
-        },
-      });
-      marker.addListener('click', () => {
-        new window.google!.maps.InfoWindow({
-          content: `<strong>${this.escapeHtml(report.kind)}</strong><br>Reporte local de prueba`,
-        }).open({ map: this.map, anchor: marker });
-      });
+      const el = document.createElement('div');
+      el.className = 'rod-map-marker marker-report';
+      el.innerText = '⚠';
+
+      const popup = new maplibregl.Popup({ offset: 12 }).setHTML(
+        `<strong>${this.escapeHtml(report.kind)}</strong><br>Reporte local de prueba`
+      );
+
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat([report.point.lng, report.point.lat])
+        .setPopup(popup)
+        .addTo(this.map!);
+
       this.reportMarkers.push(marker);
     });
   }
@@ -621,18 +642,25 @@ export class MapPage implements AfterViewInit, OnDestroy {
   }
 
   private clearMapOverlays(): void {
-    this.routePolylines.forEach((polyline) => polyline.setMap(null));
+    if (this.map) {
+      for (let i = 0; i < 5; i++) {
+        const layerId = `route-layer-${i}`;
+        const sourceId = `route-source-${i}`;
+        if (this.map.getLayer(layerId)) this.map.removeLayer(layerId);
+        if (this.map.getSource(sourceId)) this.map.removeSource(sourceId);
+      }
+    }
     this.routePolylines = [];
     this.clearRainMarkers();
   }
 
   private clearRainMarkers(): void {
-    this.rainMarkers.forEach((marker) => marker.setMap(null));
+    this.rainMarkers.forEach((marker) => marker.remove?.());
     this.rainMarkers = [];
   }
 
   private removeEndpointMarker(endpoint: Endpoint | null): void {
-    endpoint?.marker?.setMap(null);
+    endpoint?.marker?.remove?.();
   }
 
   private refreshView(): void {
