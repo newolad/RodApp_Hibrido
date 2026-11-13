@@ -28,9 +28,10 @@
             "assets": [
               { "glob": "**/*", "input": "src/assets", "output": "assets" },
               { "glob": "**/*.svg", "input": "node_modules/ionicons/dist/ionicons/svg", "output": "./svg" },
+              { "glob": "maplibre-gl-worker.mjs", "input": "node_modules/maplibre-gl/dist", "output": "assets/maplibre" },
               "src/manifest.webmanifest"
             ],
-            "styles": ["src/theme/variables.scss", "src/global.scss"],
+            "styles": ["src/global.scss", "src/theme/variables.scss"],
             "scripts": []
           },
           "configurations": {
@@ -79,7 +80,7 @@
               { "glob": "**/*", "input": "src/assets", "output": "assets" },
               "src/manifest.webmanifest"
             ],
-            "styles": ["src/theme/variables.scss", "src/global.scss"],
+            "styles": ["src/global.scss", "src/theme/variables.scss"],
             "scripts": []
           }
         }

@@ -129,3 +129,23 @@ el proyecto en la nube (`erttcudseqjrpyathmal`) via su API, asi que se puede
 seguir trabajando sin Docker. Instalar Docker Desktop (Windows, con backend
 WSL2) solo vale la pena si el equipo quiere ese ciclo de prueba local antes
 de tocar produccion.
+
+## Panel de administrador
+
+Migraciones: `20261112000000_protege_rol_usuarios.sql` y `20261112000100_panel_admin.sql`.
+
+- La app (`/app/admin`, acceso desde *Perfil*) lista los usuarios con sus motos y
+  permite suspender / habilitar cuentas, mediante las RPC
+  `admin_listar_usuarios()` y `admin_cambiar_suspension(...)`, que validan en
+  el servidor que quien llama es admin.
+- Un usuario **no puede** cambiarse `rol` ni `suspendido` a si mismo (trigger
+  `proteger_rol_usuario`).
+- Un suspendido queda bloqueado por RLS restrictiva en todas las tablas y se le
+  cierran las sesiones (`auth.sessions`).
+
+**Nombrar al primer administrador** (SQL Editor del dashboard, que no usa JWT
+de usuario, por eso el trigger lo permite):
+
+```sql
+update public.users set rol = 'admin' where correo = 'correo-del-admin@ejemplo.com';
+```

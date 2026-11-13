@@ -31,6 +31,9 @@ site_url = "http://localhost:8100"
 additional_redirect_urls = [
   "http://localhost:8100/auth/callback",
   "com.rodapp.hibrido://auth/callback",
+  # Enlace de "recuperar contrasena" (web + deep link nativo).
+  "http://localhost:8100/auth/restablecer",
+  "com.rodapp.hibrido://auth/restablecer",
 ]
 jwt_expiry = 3600
 enable_signup = true

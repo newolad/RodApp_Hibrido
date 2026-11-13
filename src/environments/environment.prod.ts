@@ -14,5 +14,7 @@ export const environment = {
   auth: {
     redirectWeb: 'https://rodapp.example.com/auth/callback',
     redirectNative: 'com.rodapp.hibrido://auth/callback',
+    /** Retorno del enlace de 'recuperar contrasena' en Android/iOS. */
+    redirectNativeReset: 'com.rodapp.hibrido://auth/restablecer',
   },
 } as const;

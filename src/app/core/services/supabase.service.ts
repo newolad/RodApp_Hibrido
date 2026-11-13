@@ -139,4 +139,86 @@ export class SupabaseService {
       .eq('moto_id', motoId)
       .order('fecha', { ascending: false });
   }
+
+  /* ========== Lecturas agregadas (varias motos del usuario a la vez) ========== */
+  // La RLS ya limita cada tabla a las motos del usuario; el `in` solo acota.
+
+  getSoatsPorMotos(motoIds: string[]) {
+    return this.client.from('soat').select('*').in('moto_id', motoIds);
+  }
+
+  getRtmPorMotos(motoIds: string[]) {
+    return this.client.from('rtm').select('*').in('moto_id', motoIds);
+  }
+
+  getCombustiblePorMotos(motoIds: string[]) {
+    return this.client
+      .from('registros_combustible')
+      .select('*')
+      .in('moto_id', motoIds)
+      .order('created_at', { ascending: false });
+  }
+
+  getMantenimientosPorMotos(motoIds: string[]) {
+    return this.client
+      .from('registros_mantenimiento')
+      .select('*')
+      .in('moto_id', motoIds)
+      .order('fecha', { ascending: false });
+  }
+
+  /* ============== Documento individual (detalle / edicion) ============== */
+
+  getSoat(id: string) {
+    return this.client.from('soat').select('*').eq('id', id).maybeSingle();
+  }
+
+  getRtm(id: string) {
+    return this.client.from('rtm').select('*').eq('id', id).maybeSingle();
+  }
+
+  actualizarSoat(id: string, cambios: Partial<SoatInsert>) {
+    return this.client.from('soat').update(cambios).eq('id', id);
+  }
+
+  actualizarRtm(id: string, cambios: Partial<RtmInsert>) {
+    return this.client.from('rtm').update(cambios).eq('id', id);
+  }
+
+  eliminarSoat(id: string) {
+    return this.client.from('soat').delete().eq('id', id);
+  }
+
+  eliminarRtm(id: string) {
+    return this.client.from('rtm').delete().eq('id', id);
+  }
+
+  /* ======================= Notificaciones ========================== */
+
+  getNotificaciones(userId: string) {
+    return this.client
+      .from('notificaciones')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(100);
+  }
+
+  marcarNotificacionesLeidas(userId: string) {
+    return this.client
+      .from('notificaciones')
+      .update({ leida: true })
+      .eq('user_id', userId)
+      .eq('leida', false);
+  }
+
+  eliminarNotificaciones(userId: string) {
+    return this.client.from('notificaciones').delete().eq('user_id', userId);
+  }
+
+  /* ========================== Consejos ============================= */
+
+  getConsejos() {
+    return this.client.from('consejos').select('*').order('created_at', { ascending: true });
+  }
 }

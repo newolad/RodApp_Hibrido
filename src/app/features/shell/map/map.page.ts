@@ -13,6 +13,13 @@ import { AlertController, IonContent, IonHeader, IonTitle, IonToolbar } from '@i
 import { Preferences } from '@capacitor/preferences';
 import * as maplibregl from 'maplibre-gl';
 
+// MapLibre 6 busca su Web Worker junto a su propio .mjs (`import.meta.url`),
+// pero al empaquetar con Angular ese archivo no existe en la raiz del sitio
+// (404) y sin worker no se dibuja ninguna capa GeoJSON: ni la ruta ni los
+// tramos de lluvia. `angular.json` lo copia a `assets/maplibre/` y aqui se
+// le indica la URL absoluta (funciona igual en web y dentro de Capacitor).
+maplibregl.setWorkerUrl(new URL('assets/maplibre/maplibre-gl-worker.mjs', document.baseURI).href);
+
 declare global {
   interface Window {
     google?: any;
@@ -39,6 +46,16 @@ const BOGOTA: Point = { lat: 4.6486, lng: -74.0636 };
 const REPORT_STORAGE_KEY = 'rodapp-map-reports';
 const REPORT_TTL_MS = 3 * 60 * 60 * 1000;
 
+/** Puntos de la ruta donde se consulta el pronóstico (Open-Meteo acepta varios en una llamada). */
+const RAIN_SAMPLE_COUNT = 8;
+/** A partir de esta probabilidad (%) el tramo se marca como "con lluvia" en el mapa. */
+const RAIN_THRESHOLD = 20;
+const RAIN_ROUTE_SOURCE = 'rain-route-source';
+const RAIN_ROUTE_LAYER = 'rain-route-layer';
+const RAIN_ROUTE_CASING_LAYER = 'rain-route-casing-layer';
+const RAIN_ZONE_SOURCE = 'rain-zone-source';
+const RAIN_ZONE_LAYER = 'rain-zone-layer';
+
 @Component({
   selector: 'app-map',
   standalone: true,
@@ -58,6 +75,8 @@ export class MapPage implements AfterViewInit, OnDestroy {
   selectedRouteIndex = -1;
   routeMode = '';
   weatherResults: RainSegment[] = [];
+  /** Tramos con lluvia (≥ umbral) en el último análisis; alimenta la leyenda del mapa. */
+  rainyCount = 0;
   forecastCheckedAt = '';
   reports: LocalReport[] = [];
   loadingMap = true;
@@ -444,31 +463,22 @@ export class MapPage implements AfterViewInit, OnDestroy {
     this.clearRainMarkers();
     this.refreshView();
     try {
-      const points = this.samplePath(this.route.path, 5).map((p: any) => ({
-        lat: p.lat,
-        lng: p.lng,
-      }));
+      const path: Point[] = this.route.path;
+      const indices = this.sampleIndices(path.length, RAIN_SAMPLE_COUNT);
+      const points = indices.map((i) => ({ lat: path[i].lat, lng: path[i].lng }));
       this.weatherResults = await this.forecastRoute(points);
       this.forecastCheckedAt = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
-      this.weatherResults.forEach((segment) => {
-        const color = this.riskColor(segment.probability);
-        const el = document.createElement('div');
-        el.className = 'rod-map-marker marker-rain';
-        el.style.backgroundColor = color;
-        el.innerText = String(segment.number);
 
-        const popup = new maplibregl.Popup({ offset: 10 }).setHTML(
-          `<strong>Tramo ${segment.number}</strong><br>Probabilidad de lluvia: ${segment.probability}%<br>Precipitación: ${segment.millimeters.toFixed(1)} mm`
-        );
+      // 1. Pinta sobre la misma ruta los tramos donde se espera lluvia.
+      this.drawRainOverlay(path, indices, this.weatherResults);
+      // 2. Marcadores con el % de lluvia en cada punto consultado.
+      this.weatherResults.forEach((segment) => this.addRainMarker(segment));
 
-        const marker = new maplibregl.Marker({ element: el })
-          .setLngLat([segment.point.lng, segment.point.lat])
-          .setPopup(popup)
-          .addTo(this.map!);
-
-        this.rainMarkers.push(marker);
-      });
-      this.status = 'Análisis listo: probabilidad máxima pronosticada durante las próximas 3 horas.';
+      const rainy = this.weatherResults.filter((s) => s.probability >= RAIN_THRESHOLD || s.raining).length;
+      this.rainyCount = rainy;
+      this.status = rainy
+        ? `Análisis listo: ${rainy} de ${this.weatherResults.length} tramos con posible lluvia (resaltados en el mapa) en las próximas 3 horas.`
+        : 'Análisis listo: no se espera lluvia relevante en la ruta durante las próximas 3 horas.';
     } catch (error) {
       this.status = error instanceof Error
         ? `No se pudo consultar el pronóstico: ${error.message}`
@@ -511,11 +521,136 @@ export class MapPage implements AfterViewInit, OnDestroy {
     });
   }
 
-  private samplePath(path: any[], count: number): any[] {
-    if (path.length <= count) return path;
+  /** Índices equidistantes dentro de la ruta donde se consulta el pronóstico. */
+  private sampleIndices(length: number, count: number): number[] {
+    if (length <= count) return Array.from({ length }, (_, i) => i);
     return Array.from({ length: count }, (_, index) =>
-      path[Math.round(index * (path.length - 1) / (count - 1))],
+      Math.round(index * (length - 1) / (count - 1)),
     );
+  }
+
+  /**
+   * Dibuja la lluvia directamente sobre el mapa:
+   *  - Cada tramo de la ruta (la porción más cercana a cada punto consultado)
+   *    se repinta con el color de riesgo si la probabilidad supera el umbral.
+   *  - Un halo translúcido alrededor de cada punto con lluvia marca la "zona".
+   */
+  private drawRainOverlay(path: Point[], indices: number[], segments: RainSegment[]): void {
+    if (!this.map) return;
+    this.removeRainLayers();
+
+    // Límites de cada tramo: punto medio entre muestras consecutivas.
+    const bounds = [0];
+    for (let k = 1; k < indices.length; k++) {
+      bounds.push(Math.round((indices[k - 1] + indices[k]) / 2));
+    }
+    bounds.push(path.length - 1);
+
+    const lineFeatures = segments
+      .map((segment, k) => {
+        const slice = path.slice(bounds[k], bounds[k + 1] + 1);
+        return {
+          type: 'Feature',
+          properties: {
+            probability: segment.probability,
+            color: this.riskColor(segment.probability),
+            wet: segment.probability >= RAIN_THRESHOLD || segment.raining,
+          },
+          geometry: { type: 'LineString', coordinates: slice.map((p) => [p.lng, p.lat]) },
+        };
+      })
+      .filter((f) => f.properties.wet && f.geometry.coordinates.length >= 2);
+
+    const zoneFeatures = segments
+      .filter((s) => s.probability >= RAIN_THRESHOLD || s.raining)
+      .map((s) => ({
+        type: 'Feature',
+        properties: { probability: s.probability, color: this.riskColor(s.probability) },
+        geometry: { type: 'Point', coordinates: [s.point.lng, s.point.lat] },
+      }));
+
+    // Halo de zona de lluvia: debajo de las líneas de ruta.
+    const beforeRoute = this.map.getLayer('route-layer-0') ? 'route-layer-0' : undefined;
+    this.map.addSource(RAIN_ZONE_SOURCE, {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: zoneFeatures } as any,
+    });
+    this.map.addLayer(
+      {
+        id: RAIN_ZONE_LAYER,
+        type: 'circle',
+        source: RAIN_ZONE_SOURCE,
+        paint: {
+          'circle-color': ['get', 'color'],
+          'circle-opacity': 0.22,
+          'circle-blur': 0.5,
+          'circle-stroke-color': ['get', 'color'],
+          'circle-stroke-width': 1,
+          'circle-stroke-opacity': 0.5,
+          // Crece con el zoom y con la probabilidad de lluvia.
+          'circle-radius': [
+            'interpolate', ['linear'], ['zoom'],
+            9, ['interpolate', ['linear'], ['get', 'probability'], 0, 10, 100, 22],
+            13, ['interpolate', ['linear'], ['get', 'probability'], 0, 30, 100, 60],
+            16, ['interpolate', ['linear'], ['get', 'probability'], 0, 70, 100, 130],
+          ],
+        },
+      },
+      beforeRoute,
+    );
+
+    // Tramos mojados de la ruta: encima de la línea cian, con borde blanco.
+    this.map.addSource(RAIN_ROUTE_SOURCE, {
+      type: 'geojson',
+      data: { type: 'FeatureCollection', features: lineFeatures } as any,
+    });
+    this.map.addLayer({
+      id: RAIN_ROUTE_CASING_LAYER,
+      type: 'line',
+      source: RAIN_ROUTE_SOURCE,
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: { 'line-color': '#ffffff', 'line-width': 12, 'line-opacity': 0.9 },
+    });
+    this.map.addLayer({
+      id: RAIN_ROUTE_LAYER,
+      type: 'line',
+      source: RAIN_ROUTE_SOURCE,
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: { 'line-color': ['get', 'color'], 'line-width': 8 },
+    });
+  }
+
+  private addRainMarker(segment: RainSegment): void {
+    if (!this.map) return;
+    const wet = segment.probability >= RAIN_THRESHOLD || segment.raining;
+    const el = document.createElement('div');
+    el.className = wet ? 'rod-rain-pill' : 'rod-rain-pill dry';
+    if (segment.probability >= 70) el.classList.add('high');
+    el.style.backgroundColor = this.riskColor(segment.probability);
+    el.textContent = wet ? `🌧 ${segment.probability}%` : `${segment.probability}%`;
+    el.title = `Tramo ${segment.number}: ${segment.probability}% de lluvia`;
+
+    const popup = new maplibregl.Popup({ offset: 14 }).setHTML(
+      `<strong>Tramo ${segment.number}${segment.raining ? ' · lluvia prevista' : ''}</strong><br>` +
+      `Probabilidad de lluvia: ${segment.probability}%<br>` +
+      `Precipitación: ${segment.millimeters.toFixed(1)} mm (próx. 3 h)`,
+    );
+
+    const marker = new maplibregl.Marker({ element: el })
+      .setLngLat([segment.point.lng, segment.point.lat])
+      .setPopup(popup)
+      .addTo(this.map);
+    this.rainMarkers.push(marker);
+  }
+
+  private removeRainLayers(): void {
+    if (!this.map) return;
+    [RAIN_ROUTE_LAYER, RAIN_ROUTE_CASING_LAYER, RAIN_ZONE_LAYER].forEach((id) => {
+      if (this.map!.getLayer(id)) this.map!.removeLayer(id);
+    });
+    [RAIN_ROUTE_SOURCE, RAIN_ZONE_SOURCE].forEach((id) => {
+      if (this.map!.getSource(id)) this.map!.removeSource(id);
+    });
   }
 
   riskColor(probability: number): string {
@@ -657,6 +792,8 @@ export class MapPage implements AfterViewInit, OnDestroy {
   private clearRainMarkers(): void {
     this.rainMarkers.forEach((marker) => marker.remove?.());
     this.rainMarkers = [];
+    this.removeRainLayers();
+    this.rainyCount = 0;
   }
 
   private removeEndpointMarker(endpoint: Endpoint | null): void {

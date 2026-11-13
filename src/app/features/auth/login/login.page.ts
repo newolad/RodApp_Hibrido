@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import {
@@ -29,7 +29,7 @@ import { mensajeErrorAuth } from '@shared/utils/auth-error.util';
   templateUrl: './login.page.html',
   styleUrl: './login.page.scss',
 })
-export class LoginPage {
+export class LoginPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly auth = inject(AuthService);
   private readonly notify = inject(NotificationService);
@@ -44,6 +44,12 @@ export class LoginPage {
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
+
+  /** Si la sesion se cerro por suspension (arranque o en uso), lo avisa una vez. */
+  ngOnInit(): void {
+    const aviso = this.auth.consumirAvisoSuspension();
+    if (aviso !== null) void this.notify.error(this.textoSuspension(aviso));
+  }
 
   /** Alterna la visibilidad del campo de contrasena. */
   togglePassword(): void {
@@ -64,10 +70,16 @@ export class LoginPage {
       await this.auth.loginWithEmail(email, password);
       await this.router.navigateByUrl('/app/inicio', { replaceUrl: true });
     } catch (error) {
-      await this.notify.error(mensajeErrorAuth(error));
+      const aviso = this.auth.consumirAvisoSuspension();
+      await this.notify.error(aviso !== null ? this.textoSuspension(aviso) : mensajeErrorAuth(error));
     } finally {
       this.cargando.set(false);
     }
+  }
+
+  private textoSuspension(motivo: string): string {
+    const base = 'Tu cuenta esta suspendida. Contacta al administrador de RodApp.';
+    return motivo ? `${base} Motivo: ${motivo}` : base;
   }
 
   /** Inicia el flujo OAuth con Google. */

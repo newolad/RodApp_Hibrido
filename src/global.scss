@@ -19,8 +19,11 @@
 @import '@ionic/angular/css/text-transformation.css';
 @import '@ionic/angular/css/flex-utils.css';
 
-/* ----- Forzamos el modo oscuro de Ionic en toda la app ----- */
-@import '@ionic/angular/css/palettes/dark.always.css';
+/* ----- Paleta -----
+ * No se importa ninguna paleta oscura de Ionic: los temas oscuro y claro los
+ * definen por completo los tokens de `theme/variables.scss` (ThemeService
+ * alterna la clase `rod-tema-claro`). La paleta oscura de Ionic usaba
+ * selectores `:root.md` que pisaban esos tokens e impedian el tema claro. */
 
 /* =========================================================================
  *  Utilidades compartidas por las vistas (coherencia visual)
@@ -81,7 +84,7 @@ ion-app {
   --background: var(--ion-color-primary);
   --background-activated: var(--ion-color-primary-shade);
   --border-radius: var(--rod-radius-pill);
-  --box-shadow: none;
+  --box-shadow: var(--rod-accent-glow);
   --color: #ffffff;
   height: 54px;
   font-family: var(--rod-font-heading);
@@ -100,7 +103,7 @@ ion-app {
   padding: 56px 24px;
   color: var(--rod-text-secondary);
 
-  ion-icon {
+  > ion-icon {
     font-size: 56px;
     color: var(--ion-color-primary);
     opacity: 0.85;
@@ -121,7 +124,55 @@ ion-app {
   }
 }
 
-/* La barra de tabs no debe tapar contenido en iPhone con notch */
-ion-tab-bar {
-  padding-bottom: var(--ion-safe-area-bottom, 0);
+/* Componentes del Figma (tabs, toolbars, listas, chips, campos, vacio...) */
+@import 'theme/rod-components';
+
+/* ----- Marcadores del mapa (MapLibre) -----
+ * Globales a proposito: MapLibre inserta estos nodos con document.createElement,
+ * fuera de la encapsulacion de estilos de MapPage. */
+.rod-map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: 2.5px solid #ffffff;
+  color: #ffffff;
+  font-family: var(--rod-font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.45);
+  cursor: pointer;
+}
+.rod-map-marker.marker-origin { background: #16865f; }
+.rod-map-marker.marker-destination { background: #c45537; }
+.rod-map-marker.marker-report { background: #773db4; font-size: 12px; }
+
+/* Etiqueta de % de lluvia sobre cada tramo consultado. */
+.rod-rain-pill {
+  padding: 3px 8px;
+  border-radius: 999px;
+  border: 2px solid #ffffff;
+  color: #ffffff;
+  font-family: var(--rod-font-heading);
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+}
+.rod-rain-pill.dry { padding: 2px 6px; font-size: 9px; opacity: 0.85; }
+.rod-rain-pill.high {
+  font-size: 13px;
+  padding: 4px 10px;
+  animation: rod-rain-pulse 1.6s ease-in-out infinite;
+}
+@keyframes rod-rain-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201, 67, 82, 0.55), 0 3px 10px rgba(0, 0, 0, 0.4); }
+  50% { box-shadow: 0 0 0 9px rgba(201, 67, 82, 0), 0 3px 10px rgba(0, 0, 0, 0.4); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rod-rain-pill.high { animation: none; }
 }

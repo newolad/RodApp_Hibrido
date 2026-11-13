@@ -6,6 +6,7 @@ import { IonApp, IonRouterOutlet } from '@ionic/angular/standalone';
 
 import { AuthService } from './core/services/auth.service';
 import { NotificationService } from './core/services/notification.service';
+import { RecordatoriosService } from './core/services/recordatorios.service';
 import { mensajeErrorAuth } from './shared/utils/auth-error.util';
 import { registrarIconos } from './shared/ui/app-icons';
 
@@ -17,6 +18,7 @@ import { registrarIconos } from './shared/ui/app-icons';
  *  - Registrar el set de iconos de la app (una sola vez).
  *  - Escuchar el deep link `com.rodapp.hibrido://auth/callback` en NATIVO
  *    para completar el login con Google.
+ *  - Iniciar los recordatorios locales de vencimiento (SOAT / RTM).
  */
 @Component({
   selector: 'app-root',
@@ -33,12 +35,16 @@ export class AppComponent implements OnInit {
   private readonly notify = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly zone = inject(NgZone);
+  private readonly recordatorios = inject(RecordatoriosService);
 
   constructor() {
     registrarIconos();
   }
 
   ngOnInit(): void {
+    // Recordatorios locales de vencimiento (canal Android + tap en el aviso).
+    void this.recordatorios.init();
+
     if (Capacitor.isNativePlatform()) {
       this.escucharDeepLinks();
     }
@@ -52,6 +58,19 @@ export class AppComponent implements OnInit {
    */
   private escucharDeepLinks(): void {
     CapacitorApp.addListener('appUrlOpen', async (event: URLOpenListenerEvent) => {
+      // Enlace de "recuperar contrasena": canjear el code y pedir la nueva clave.
+      if (event.url.includes('auth/restablecer')) {
+        await this.zone.run(async () => {
+          try {
+            await this.auth.canjearCodigoDeUrl(event.url);
+          } catch {
+            // ResetPasswordPage detecta la falta de sesion y ofrece pedir otro enlace.
+          }
+          await this.router.navigateByUrl('/auth/restablecer', { replaceUrl: true });
+        });
+        return;
+      }
+
       if (!event.url.includes('auth/callback')) return;
 
       // El listener corre fuera de la zona de Angular -> lo reingresamos

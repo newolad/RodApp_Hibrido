@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -19,6 +19,8 @@ import {
 import { MotosService } from '@core/services/motos.service';
 import { NotificationService } from '@core/services/notification.service';
 import { SupabaseService } from '@core/services/supabase.service';
+import { GarajeDatosService } from '@core/services/garaje-datos.service';
+import { Soat } from '@core/models/models';
 
 /**
  * Frame Figma "Plantilla reg SOAT" (2:2517).
@@ -50,9 +52,9 @@ import { SupabaseService } from '@core/services/supabase.service';
     <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-back-button defaultHref="/app/garaje/detalle" text=""></ion-back-button>
+          <ion-back-button [defaultHref]="volverA()" text=""></ion-back-button>
         </ion-buttons>
-        <ion-title>Registrar SOAT</ion-title>
+        <ion-title>{{ editar() ? 'Editar SOAT' : 'Registrar SOAT' }}</ion-title>
       </ion-toolbar>
     </ion-header>
 
@@ -120,7 +122,7 @@ import { SupabaseService } from '@core/services/supabase.service';
           expand="block"
           [disabled]="form.invalid || guardando()"
         >
-          Guardar SOAT
+          {{ editar() ? 'Guardar cambios' : 'Guardar SOAT' }}
         </ion-button>
       </form>
     </ion-content>
@@ -156,10 +158,47 @@ export class SoatFormPage implements OnInit {
     fechaVencimiento: ['', [Validators.required]],
   });
 
+  /** Query params: `?moto=<id>` preselecciona la moto; `?editar=<id>` edita un registro. */
+  readonly moto = input<string>();
+  readonly editar = input<string>();
+
+  private readonly garaje = inject(GarajeDatosService);
+  private readonly motoIdOriginal = signal<string | null>(null);
+
+  readonly volverA = computed(() => {
+    const id = this.editar();
+    if (id) return '/app/documentos/soat/' + id;
+    const motoId = this.moto() ?? this.motoIdOriginal();
+    return motoId ? '/app/garaje/detalle/' + motoId : '/app/garaje';
+  });
+
   async ngOnInit(): Promise<void> {
     await this.motosService.cargar();
-    const activa = this.motosService.motoActiva();
-    if (activa) this.form.patchValue({ motoId: activa.id });
+
+    const editarId = this.editar();
+    if (editarId) {
+      const { data, error } = await this.supabase.getSoat(editarId);
+      const d = data as Soat | null;
+      if (error || !d) {
+        await this.notify.error('No se encontró el documento a editar.');
+        await this.router.navigateByUrl('/app/garaje', { replaceUrl: true });
+        return;
+      }
+      this.motoIdOriginal.set(d.moto_id);
+      this.form.patchValue({
+        motoId: d.moto_id,
+        numeroPoliza: d.numero_poliza,
+        aseguradora: d.aseguradora,
+        fechaInicio: d.fecha_inicio,
+        fechaVencimiento: d.fecha_vencimiento,
+      });
+      return;
+    }
+
+    const solicitada = this.moto();
+    const existe = solicitada && this.motosService.motos().some((m) => m.id === solicitada);
+    const motoId = existe ? solicitada : this.motosService.motoActiva()?.id;
+    if (motoId) this.form.patchValue({ motoId });
   }
 
   async guardar(): Promise<void> {
@@ -173,21 +212,34 @@ export class SoatFormPage implements OnInit {
       await this.notify.error('Completa todos los campos.');
       return;
     }
+    const fechas = this.form.getRawValue();
+    if (fechas.fechaVencimiento <= fechas.fechaInicio) {
+      await this.notify.error('La fecha de vencimiento debe ser posterior a la de inicio.');
+      return;
+    }
 
     const { motoId, numeroPoliza, aseguradora, fechaInicio, fechaVencimiento } =
       this.form.getRawValue();
     this.guardando.set(true);
     try {
-      const { error } = await this.supabase.registrarSoat({
+      const datos = {
         moto_id: motoId,
         numero_poliza: numeroPoliza,
         aseguradora,
         fecha_inicio: fechaInicio,
         fecha_vencimiento: fechaVencimiento,
-      });
+      };
+      const editarId = this.editar();
+      const { error } = editarId
+        ? await this.supabase.actualizarSoat(editarId, datos)
+        : await this.supabase.registrarSoat(datos);
       if (error) throw error;
-      await this.notify.success('SOAT registrado.');
-      await this.router.navigateByUrl('/app/garaje/detalle');
+      void this.garaje.cargar(true);
+      await this.notify.success(editarId ? 'SOAT actualizado.' : 'SOAT registrado.');
+      await this.router.navigateByUrl(
+        editarId ? '/app/documentos/soat/' + editarId : '/app/garaje/detalle/' + motoId,
+        { replaceUrl: true },
+      );
     } catch (error) {
       await this.notify.error('No se pudo guardar el SOAT. Intenta de nuevo.');
       console.error('[SoatFormPage] guardar', error);

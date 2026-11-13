@@ -46,35 +46,25 @@
 
 // ---- Logo ----
 .logo-section {
-  margin-bottom: 40px;
-}
-.logo-badge {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--rod-radius-pill);
-  background: var(--ion-color-primary);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-bottom: 16px;
-
-  ion-icon {
-    font-size: 34px;
-    color: #ffffff;
-  }
+  text-align: center;
+  margin-bottom: 32px;
 }
-.app-title {
-  font-family: var(--rod-font-heading);
-  font-weight: 700;
-  font-size: 30px;
-  color: var(--rod-text-heading);
-  margin: 0;
+.brand-logo {
+  width: 100%;
+  max-width: 240px;
+  height: auto;
+  display: block;
+  margin: 0 auto;
 }
 .app-subtitle {
   font-family: var(--rod-font-body);
-  font-size: 16px;
-  color: var(--ion-color-primary);
-  margin: 6px 0 0;
+  font-size: 15px;
+  color: var(--rod-text-secondary);
+  margin: 10px 0 0;
 }
 
 // ---- Formulario ----

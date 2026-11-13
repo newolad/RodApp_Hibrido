@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { authGuard } from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 /**
  * Mapa de rutas de RodApp.
@@ -40,6 +41,23 @@ export const routes: Routes = [
     canActivate: [guestGuard],
     loadComponent: () =>
       import('./features/auth/register/register.page').then((m) => m.RegisterPage),
+  },
+  {
+    // "Olvide mi contrasena" paso 1: pedir el enlace por correo.
+    path: 'recuperar',
+    canActivate: [guestGuard],
+    loadComponent: () =>
+      import('./features/auth/forgot-password/forgot-password.page').then(
+        (m) => m.ForgotPasswordPage,
+      ),
+  },
+  {
+    // Paso 2: destino del enlace del correo. Sin guard (ver ResetPasswordPage).
+    path: 'auth/restablecer',
+    loadComponent: () =>
+      import('./features/auth/reset-password/reset-password.page').then(
+        (m) => m.ResetPasswordPage,
+      ),
   },
   {
     // Retorno del login con Google (OAuth) en la WEB.
@@ -102,6 +120,16 @@ export const routes: Routes = [
         path: 'perfil',
         loadComponent: () =>
           import('./features/shell/profile/profile.page').then((m) => m.ProfilePage),
+      },
+
+      {
+        // Panel de administrador: usuarios, sus motos y suspension.
+        path: 'admin',
+        canActivate: [adminGuard],
+        loadComponent: () =>
+          import('./features/admin/admin-users/admin-users.page').then(
+            (m) => m.AdminUsersPage,
+          ),
       },
 
       /* --- Vistas de detalle / formulario (frames de Figma, fuera de los 5 tabs) --- */
@@ -169,12 +197,15 @@ export const routes: Routes = [
       },
       {
         // Frames "Garaje (Sin Documentos) 1 y 2" (detalle de moto)
-        path: 'garaje/detalle',
+        path: 'garaje/detalle/:id',
         loadComponent: () =>
           import('./features/shell/moto-detail/moto-detail.page').then(
             (m) => m.MotoDetailPage,
           ),
       },
+      // Rutas antiguas sin id: no hay a que moto/documento ir, vuelven al Garaje.
+      { path: 'garaje/detalle', redirectTo: 'garaje' },
+      { path: 'documentos/detalle', redirectTo: 'garaje' },
       {
         // Frame "Plantilla reg SOAT"
         path: 'garaje/soat/nuevo',
@@ -192,8 +223,8 @@ export const routes: Routes = [
           ),
       },
       {
-        // Frame "Detalle Documento RTM"
-        path: 'documentos/detalle',
+        // Frame "Detalle Documento RTM" (tipo = soat | rtm)
+        path: 'documentos/:tipo/:id',
         loadComponent: () =>
           import('./features/shell/document-detail/document-detail.page').then(
             (m) => m.DocumentDetailPage,

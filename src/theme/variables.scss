@@ -7,9 +7,17 @@
  *  y se agregan variables propias (--rod-*) para lo que no tiene equivalente
  *  directo en Ionic (superficies oscuras, radios de pildora, etc).
  *
- *  La app usa un unico tema OSCURO en web y en movil (coherencia de color
- *  pedida en el brief), por eso los tokens se definen sobre :root y no se
- *  duplican en `prefers-color-scheme`.
+ *  Dos temas:
+ *   - OSCURO (predeterminado): tokens sobre `:root`.
+ *   - CLARO: `:root.rod-tema-claro` sobreescribe solo lo que cambia. Pensado
+ *     para usar la app con sol o con visor polarizado / ahumado en el casco:
+ *     fondos claros, texto casi negro y un cian mas oscuro para que el acento
+ *     tenga contraste AA sobre blanco.
+ *  `ThemeService` pone o quita la clase segun la preferencia del usuario
+ *  (Ajustes > Tema: oscuro, claro o automatico segun el telefono).
+ *
+ *  Regla: las vistas usan SIEMPRE estos tokens (nunca colores fijos para
+ *  fondos o textos), asi ambos temas funcionan sin tocar cada pagina.
  * =============================================================================
  */
 
@@ -57,12 +65,12 @@
   --ion-color-danger-shade: #d23c3c;
   --ion-color-danger-tint: #f15757;
 
-  --ion-color-light: #1e2124;
-  --ion-color-light-rgb: 30, 33, 36;
+  --ion-color-light: #172a2e;
+  --ion-color-light-rgb: 23, 42, 46;
   --ion-color-light-contrast: #f1f5f9;
   --ion-color-light-contrast-rgb: 241, 245, 249;
-  --ion-color-light-shade: #1a1d1f;
-  --ion-color-light-tint: #383b3e;
+  --ion-color-light-shade: #142528;
+  --ion-color-light-tint: #2e4448;
 
   --ion-color-medium: #94a3b8;
   --ion-color-medium-rgb: 148, 163, 184;
@@ -78,15 +86,20 @@
   --ion-color-dark-shade: #d4d8db;
   --ion-color-dark-tint: #f2f6fa;
 
-  /* ---------- Superficies (3 tonos de fondo del mockup) ---------- */
-  --rod-bg-base: #101f22;   /* Login, Dashboard, Garaje, Mapa, Historial, Perfil */
-  --rod-bg-alt: #1e2124;    /* Crear Cuenta, Configuracion de Perfil */
-  --rod-bg-alt-2: #1a1c1e;  /* Ruta seleccionada / modales */
-  --rod-surface: #2b2f33;   /* Inputs sobre fondo alt */
-  --rod-surface-2: #334155; /* Chips / avatares */
-  --rod-border: rgba(148, 163, 184, 0.18);
-  --rod-border-accent: rgba(17, 180, 212, 0.35);
+  /* ---------- Superficies ----------
+   * Todas con el tinte petroleo/teal del Figma (antes eran grises neutros
+   * #1e2124 / #2b2f33 / #334155 que "despegaban" del fondo #101f22).
+   * Escala de profundidad: base < alt (tarjetas) < surface (inputs) < surface-2.
+   */
+  --rod-bg-base: #101f22;   /* Fondo de todas las pantallas */
+  --rod-bg-alt: #172a2e;    /* Tarjetas, listas agrupadas, tab bar */
+  --rod-bg-alt-2: #132528;  /* Modales / hojas */
+  --rod-surface: #1c3236;   /* Inputs y filas internas */
+  --rod-surface-2: #24403f; /* Chips / avatares / hover */
+  --rod-border: rgba(126, 196, 208, 0.12);
+  --rod-border-accent: rgba(17, 180, 212, 0.4);
   --rod-accent-soft: rgba(17, 180, 212, 0.12);
+  --rod-accent-glow: 0 8px 24px rgba(17, 180, 212, 0.28);
 
   /* ---------- Texto ---------- */
   --rod-text-heading: #f1f5f9;
@@ -95,9 +108,22 @@
   --rod-text-secondary-alt: #9ca3af;
   --rod-text-muted: #64748b;
 
+  /* ---------- Texto de estado (chips, avisos, botones destructivos) ---------- */
+  --rod-ok-text: #4ade80;
+  --rod-warn-text: #fbbf24;
+  --rod-danger-text: #f87171;
+
+  /* Componentes RGB del fondo, para degradados: rgba(var(--rod-bg-base-rgb), .9) */
+  --rod-bg-base-rgb: 16, 31, 34;
+  --rod-shadow: 0 8px 28px rgba(0, 0, 0, 0.14);
+
+  /* Controles nativos (fecha, scrollbars) acordes al tema */
+  color-scheme: dark;
+
   /* ---------- Forma ---------- */
-  --rod-radius-pill: 9999px; /* inputs y botones tipo capsula */
-  --rod-radius-card: 16px;   /* tarjetas / inputs sobre fondo alt */
+  --rod-radius-pill: 9999px; /* botones tipo capsula */
+  --rod-radius-card: 16px;   /* tarjetas */
+  --rod-radius-field: 12px;  /* inputs y filas de lista (como en Figma) */
   --rod-radius-lg: 24px;
 
   /* ---------- Tipografia ---------- */
@@ -142,6 +168,105 @@
   --ion-color-step-850: #e6f7f9;
   --ion-color-step-900: #f2fbfc;
   --ion-color-step-950: #f9fdfe;
+}
+
+/* =============================================================================
+ *  TEMA CLARO (alto contraste para exteriores / visor de sol)
+ * ============================================================================= */
+:root.rod-tema-claro {
+  color-scheme: light;
+
+  /* Acento cian oscurecido: #087a94 tiene contraste ~5:1 sobre blanco */
+  --ion-color-primary: #087a94;
+  --ion-color-primary-rgb: 8, 122, 148;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #076b82;
+  --ion-color-primary-tint: #21879f;
+
+  --ion-color-success: #15803d;
+  --ion-color-success-rgb: 21, 128, 61;
+  --ion-color-success-shade: #127136;
+  --ion-color-success-tint: #2c8d50;
+
+  --ion-color-warning: #d97706;
+  --ion-color-warning-rgb: 217, 119, 6;
+  --ion-color-warning-shade: #bf6905;
+  --ion-color-warning-tint: #dd851f;
+
+  --ion-color-danger: #dc2626;
+  --ion-color-danger-rgb: 220, 38, 38;
+  --ion-color-danger-shade: #c22121;
+  --ion-color-danger-tint: #e03c3c;
+
+  --ion-color-light: #ffffff;
+  --ion-color-light-rgb: 255, 255, 255;
+  --ion-color-light-contrast: #0b1a1d;
+  --ion-color-light-contrast-rgb: 11, 26, 29;
+  --ion-color-light-shade: #e0e0e0;
+  --ion-color-light-tint: #ffffff;
+
+  --ion-color-medium: #64748b;
+  --ion-color-medium-rgb: 100, 116, 139;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #58667a;
+  --ion-color-medium-tint: #748297;
+
+  --ion-color-dark: #101f22;
+  --ion-color-dark-rgb: 16, 31, 34;
+  --ion-color-dark-contrast: #ffffff;
+  --ion-color-dark-contrast-rgb: 255, 255, 255;
+  --ion-color-dark-shade: #0e1b1e;
+  --ion-color-dark-tint: #283538;
+
+  /* Superficies */
+  --rod-bg-base: #f3f7f8;
+  --rod-bg-base-rgb: 243, 247, 248;
+  --rod-bg-alt: #ffffff;
+  --rod-bg-alt-2: #f8fbfb;
+  --rod-surface: #eef4f5;
+  --rod-surface-2: #e2ecee;
+  --rod-border: rgba(16, 31, 34, 0.16);
+  --rod-border-accent: rgba(8, 122, 148, 0.45);
+  --rod-accent-soft: rgba(8, 122, 148, 0.1);
+  --rod-accent-glow: 0 8px 20px rgba(8, 122, 148, 0.22);
+  --rod-shadow: 0 6px 20px rgba(16, 31, 34, 0.08);
+
+  /* Texto: casi negro sobre fondo claro (contraste 7:1 o mas) */
+  --rod-text-heading: #0b1a1d;
+  --rod-text-body: #1e293b;
+  --rod-text-secondary: #475569;
+  --rod-text-secondary-alt: #4b5563;
+  --rod-text-muted: #64748b;
+
+  --rod-ok-text: #15803d;
+  --rod-warn-text: #b45309;
+  --rod-danger-text: #b91c1c;
+
+  /* Overrides de Ionic */
+  --ion-background-color-rgb: 243, 247, 248;
+  --ion-text-color-rgb: 11, 26, 29;
+
+  --ion-color-step-50: #f3f4f4;
+  --ion-color-step-100: #e7e8e8;
+  --ion-color-step-150: #dadddd;
+  --ion-color-step-200: #ced1d2;
+  --ion-color-step-250: #c2c6c6;
+  --ion-color-step-300: #b6babb;
+  --ion-color-step-350: #aaafb0;
+  --ion-color-step-400: #9da3a5;
+  --ion-color-step-450: #919899;
+  --ion-color-step-500: #858c8e;
+  --ion-color-step-550: #798183;
+  --ion-color-step-600: #6d7677;
+  --ion-color-step-650: #606a6c;
+  --ion-color-step-700: #545f61;
+  --ion-color-step-750: #485356;
+  --ion-color-step-800: #3c484a;
+  --ion-color-step-850: #303c3f;
+  --ion-color-step-900: #233134;
+  --ion-color-step-950: #172528;
 }
 
 /* Clases de color utilitarias para <ion-*> con color="warning|success|..." en fondo oscuro */

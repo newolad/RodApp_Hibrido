@@ -1,4 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { Capacitor } from '@capacitor/core';
 import { Browser } from '@capacitor/browser';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
@@ -27,6 +28,7 @@ import { Perfil, RegistroPayload, SesionActual } from '../models/models';
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly supabase = inject(SupabaseService);
+  private readonly router = inject(Router);
 
   /** Sesion actual de Supabase (o null si no hay). Signal -> reactivo en templates. */
   private readonly _session = signal<Session | null>(null);
@@ -34,12 +36,22 @@ export class AuthService {
   private readonly _perfil = signal<Perfil | null>(null);
   /** Indica que ya se resolvio la sesion inicial (evita parpadeos en los guards). */
   private readonly _ready = signal(false);
+  /**
+   * Motivo de suspension pendiente de mostrar en el login (cadena vacia si el
+   * admin no dio motivo; null si no hay aviso).
+   */
+  private readonly _avisoSuspension = signal<string | null>(null);
+  /** Carga de perfil en curso (para `esperarPerfil`). */
+  private perfilEnCurso: Promise<void> = Promise.resolve();
 
   /** true cuando hay un usuario autenticado. */
   readonly isAuthenticated = computed(() => this._session() !== null);
   /** true cuando `init()` ya termino la primera comprobacion. */
   readonly isReady = this._ready.asReadonly();
   readonly perfil = this._perfil.asReadonly();
+  /** true si el perfil actual es administrador (habilita el panel de admin). */
+  readonly isAdmin = computed(() => this._perfil()?.rol === 'admin' && !this._perfil()?.suspendido);
+  readonly avisoSuspension = this._avisoSuspension.asReadonly();
 
   /** Vista compacta de la sesion para plantillas (perfil, header, etc.). */
   readonly sesion = computed<SesionActual | null>(() => {
@@ -64,20 +76,44 @@ export class AuthService {
     const { data } = await this.supabase.client.auth.getSession();
     this._session.set(data.session);
     if (data.session) {
-      await this.cargarPerfil(data.session);
+      this.perfilEnCurso = this.cargarPerfil(data.session);
+      await this.perfilEnCurso;
     }
 
     // 2. Suscripcion a cambios (login, logout, refresh de token, OAuth...).
     this.supabase.client.auth.onAuthStateChange((event: AuthChangeEvent, session) => {
       this._session.set(session);
       if (session) {
-        void this.cargarPerfil(session);
+        this.perfilEnCurso = this.cargarPerfil(session);
       } else {
         this._perfil.set(null);
       }
     });
 
     this._ready.set(true);
+  }
+
+  /** Resuelve cuando la sesion inicial y el perfil del usuario ya estan cargados. */
+  async esperarPerfil(): Promise<void> {
+    if (!this._ready()) {
+      await new Promise<void>((resolve) => {
+        const inicio = Date.now();
+        const id = setInterval(() => {
+          if (this._ready() || Date.now() - inicio > 5000) {
+            clearInterval(id);
+            resolve();
+          }
+        }, 50);
+      });
+    }
+    await this.perfilEnCurso.catch(() => undefined);
+  }
+
+  /** Lee y limpia el aviso de cuenta suspendida (lo muestra el login una vez). */
+  consumirAvisoSuspension(): string | null {
+    const aviso = this._avisoSuspension();
+    this._avisoSuspension.set(null);
+    return aviso;
   }
 
   /* ===================== Registro con correo ===================== */
@@ -120,11 +156,18 @@ export class AuthService {
   /* ================== Inicio de sesion con correo ================== */
 
   async loginWithEmail(email: string, password: string): Promise<void> {
-    const { error } = await this.supabase.client.auth.signInWithPassword({
+    const { data, error } = await this.supabase.client.auth.signInWithPassword({
       email: email.trim(),
       password,
     });
     if (error) throw error;
+
+    // Una cuenta suspendida por un admin no puede entrar aunque la clave sea correcta.
+    const { data: perfil } = await this.supabase.getPerfil(data.user.id);
+    if ((perfil as Perfil | null)?.suspendido) {
+      await this.cerrarPorSuspension(perfil as Perfil, false);
+      throw new Error('cuenta_suspendida');
+    }
     // `onAuthStateChange` actualiza los signals automaticamente.
   }
 
@@ -173,11 +216,46 @@ export class AuthService {
       /* En algunas plataformas el navegador ya esta cerrado; se ignora. */
     }
 
-    const code = new URL(url).searchParams.get('code');
-    if (!code) return;
+    await this.canjearCodigoDeUrl(url);
+  }
 
+  /* ===================== Recuperar contrasena ===================== */
+
+  /**
+   * Paso 1: envia al correo un enlace de recuperacion (Supabase Auth).
+   * Con PKCE el enlace vuelve a `/auth/restablecer?code=...` (web) o al deep
+   * link `com.rodapp.hibrido://auth/restablecer?code=...` (nativo); ese `code`
+   * se canjea por una sesion temporal que permite fijar la nueva contrasena.
+   *
+   * Supabase responde igual exista o no el correo, para no revelar que
+   * cuentas estan registradas (la UI debe mostrar un mensaje neutro).
+   */
+  async solicitarRecuperacion(email: string): Promise<void> {
+    const { error } = await this.supabase.client.auth.resetPasswordForEmail(email.trim(), {
+      redirectTo: this.resetRedirectUrl(),
+    });
+    if (error) throw error;
+  }
+
+  /**
+   * Paso 2: con la sesion de recuperacion ya activa, guarda la nueva contrasena.
+   * Supabase la almacena con hash en `auth.users`; nunca pasa por nuestras tablas.
+   */
+  async actualizarPassword(nuevaPassword: string): Promise<void> {
+    const { error } = await this.supabase.client.auth.updateUser({ password: nuevaPassword });
+    if (error) throw error;
+  }
+
+  /**
+   * Canjea el `code` de un deep link nativo (OAuth o recuperacion) por sesion.
+   * Devuelve false si la URL no trae codigo.
+   */
+  async canjearCodigoDeUrl(url: string): Promise<boolean> {
+    const code = new URL(url).searchParams.get('code');
+    if (!code) return false;
     const { error } = await this.supabase.client.auth.exchangeCodeForSession(code);
     if (error) throw error;
+    return true;
   }
 
   /* ============================ Perfil ============================= */
@@ -213,6 +291,10 @@ export class AuthService {
     const { data, error } = await this.supabase.getPerfil(session.user.id);
 
     if (data) {
+      if ((data as Perfil).suspendido) {
+        await this.cerrarPorSuspension(data as Perfil, this._ready());
+        return;
+      }
       this._perfil.set(data as Perfil);
       return;
     }
@@ -235,10 +317,37 @@ export class AuthService {
     }
   }
 
-  /** Devuelve el redirect OAuth correcto segun la plataforma. */
+  /**
+   * Saca de la app a un usuario suspendido: cierra la sesion local y deja un
+   * aviso para el login. `navegar` es false durante el arranque (los guards
+   * ya lo mandan a /login) y en el login con correo (la pagina muestra el error).
+   */
+  private async cerrarPorSuspension(perfil: Perfil, navegar: boolean): Promise<void> {
+    this._avisoSuspension.set(perfil.suspendido_motivo ?? '');
+    await this.supabase.client.auth.signOut({ scope: 'local' }).catch(() => undefined);
+    this._session.set(null);
+    this._perfil.set(null);
+    if (navegar) {
+      await this.router.navigateByUrl('/login', { replaceUrl: true });
+    }
+  }
+
+  /**
+   * Devuelve el redirect OAuth correcto segun la plataforma.
+   * En web se usa el origen real donde corre la app (localhost:8100 en
+   * desarrollo, el dominio desplegado en produccion), asi no depende de un
+   * valor fijo en `environment` que puede quedar desactualizado.
+   */
   private redirectUrl(): string {
     return Capacitor.isNativePlatform()
       ? environment.auth.redirectNative
-      : environment.auth.redirectWeb;
+      : `${window.location.origin}/auth/callback`;
+  }
+
+  /** Destino del enlace de recuperacion de contrasena segun la plataforma. */
+  private resetRedirectUrl(): string {
+    return Capacitor.isNativePlatform()
+      ? environment.auth.redirectNativeReset
+      : `${window.location.origin}/auth/restablecer`;
   }
 }

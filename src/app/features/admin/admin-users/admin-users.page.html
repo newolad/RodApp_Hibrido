@@ -1,0 +1,205 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-back-button defaultHref="/app/perfil" text=""></ion-back-button>
+    </ion-buttons>
+    <ion-title>Administración</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="cargar()" [disabled]="cargando()" aria-label="Recargar usuarios">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="cargar($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <div class="rod-container admin">
+    <header class="hero">
+      <p class="eyebrow">Panel de administrador</p>
+      <h1 class="rod-heading">Usuarios registrados</h1>
+      <p class="rod-subheading">Consulta las motos de cada motero y suspende o habilita su acceso.</p>
+    </header>
+
+    <!-- Indicadores -->
+    <section class="stats" aria-label="Resumen">
+      <div class="stat">
+        <ion-icon name="people-outline" aria-hidden="true"></ion-icon>
+        <strong>{{ stats().total }}</strong>
+        <span>Usuarios</span>
+      </div>
+      <div class="stat ok">
+        <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
+        <strong>{{ stats().activos }}</strong>
+        <span>Activos</span>
+      </div>
+      <div class="stat danger">
+        <ion-icon name="ban-outline" aria-hidden="true"></ion-icon>
+        <strong>{{ stats().suspendidos }}</strong>
+        <span>Suspendidos</span>
+      </div>
+      <div class="stat">
+        <ion-icon name="bicycle-outline" aria-hidden="true"></ion-icon>
+        <strong>{{ stats().motos }}</strong>
+        <span>Motos</span>
+      </div>
+    </section>
+
+    <!-- Busqueda y filtros -->
+    <section class="toolbar">
+      <label class="search">
+        <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+        <input
+          type="search"
+          [value]="busqueda()"
+          (input)="onBuscar($any($event.target).value)"
+          placeholder="Buscar por nombre, correo o placa"
+          aria-label="Buscar usuarios"
+        />
+      </label>
+      <div class="chips" role="tablist" aria-label="Filtrar usuarios">
+        @for (f of filtros; track f.id) {
+          <button
+            type="button"
+            role="tab"
+            class="chip"
+            [class.active]="filtro() === f.id"
+            [attr.aria-selected]="filtro() === f.id"
+            (click)="filtro.set(f.id)"
+          >
+            {{ f.label }}
+          </button>
+        }
+      </div>
+    </section>
+
+    @if (cargando()) {
+      <div class="state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Cargando usuarios...</p>
+      </div>
+    } @else if (error()) {
+      <div class="rod-empty">
+        <ion-icon name="cloud-offline-outline" aria-hidden="true"></ion-icon>
+        <h2>No se pudieron cargar los usuarios</h2>
+        <p>{{ error() }}</p>
+        <ion-button shape="round" class="rod-btn-primary retry" (click)="cargar()">Reintentar</ion-button>
+      </div>
+    } @else if (!visibles().length) {
+      <div class="rod-empty">
+        <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+        <h2>{{ usuarios().length ? 'Sin resultados' : 'Aún no hay usuarios' }}</h2>
+        <p>{{ usuarios().length ? 'Prueba con otra búsqueda o filtro.' : 'Cuando alguien se registre aparecerá aquí.' }}</p>
+      </div>
+    } @else {
+      <p class="count">{{ visibles().length }} de {{ usuarios().length }} usuarios</p>
+
+      <ul class="users">
+        @for (u of visibles(); track u.id) {
+          <li class="user-card" [class.suspended]="u.suspendido">
+            <div class="user-main">
+              <div class="avatar" aria-hidden="true">
+                @if (u.avatar_url) {
+                  <img [src]="u.avatar_url" alt="" />
+                } @else {
+                  <span>{{ iniciales(u) }}</span>
+                }
+              </div>
+
+              <div class="user-info">
+                <div class="name-row">
+                  <h2>{{ nombreCompleto(u) }}</h2>
+                  @if (u.rol === 'admin') {
+                    <span class="badge admin">Admin</span>
+                  }
+                  @if (u.id === miId()) {
+                    <span class="badge me">Tú</span>
+                  }
+                  <span class="badge" [class.ok]="!u.suspendido" [class.danger]="u.suspendido">
+                    {{ u.suspendido ? 'Suspendido' : 'Activo' }}
+                  </span>
+                </div>
+                <p class="email">{{ u.correo ?? 'Sin correo' }}</p>
+                <p class="meta">
+                  <ion-icon name="calendar-outline" aria-hidden="true"></ion-icon>
+                  Registro {{ u.created_at | date: 'd MMM y' : undefined : 'es' }}
+                  @if (u.ultimo_acceso) {
+                    <span class="dot">·</span>
+                    <ion-icon name="time-outline" aria-hidden="true"></ion-icon>
+                    Último acceso {{ u.ultimo_acceso | date: 'd MMM y, h:mm a' : undefined : 'es' }}
+                  }
+                </p>
+                @if (u.suspendido) {
+                  <p class="suspension">
+                    <ion-icon name="ban-outline" aria-hidden="true"></ion-icon>
+                    Suspendido {{ u.suspendido_en ? (u.suspendido_en | date: 'd MMM y' : undefined : 'es') : '' }}{{ u.suspendido_motivo ? ' · ' + u.suspendido_motivo : '' }}
+                  </p>
+                }
+              </div>
+            </div>
+
+            <div class="user-actions">
+              <button
+                type="button"
+                class="motos-toggle"
+                [class.open]="expandidos().has(u.id)"
+                [attr.aria-expanded]="expandidos().has(u.id)"
+                [disabled]="!u.motos.length"
+                (click)="toggleMotos(u.id)"
+              >
+                <ion-icon name="bicycle-outline" aria-hidden="true"></ion-icon>
+                {{ u.motos.length }} {{ u.motos.length === 1 ? 'moto' : 'motos' }}
+                @if (u.motos.length) {
+                  <ion-icon name="chevron-down-outline" class="chev" aria-hidden="true"></ion-icon>
+                }
+              </button>
+
+              @if (u.id !== miId()) {
+                @if (u.suspendido) {
+                  <button type="button" class="action enable" [disabled]="procesando() === u.id" (click)="habilitar(u)">
+                    @if (procesando() === u.id) {
+                      <ion-spinner name="crescent"></ion-spinner>
+                    } @else {
+                      <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
+                    }
+                    Habilitar
+                  </button>
+                } @else if (u.rol !== 'admin') {
+                  <button type="button" class="action suspend" [disabled]="procesando() === u.id" (click)="suspender(u)">
+                    @if (procesando() === u.id) {
+                      <ion-spinner name="crescent"></ion-spinner>
+                    } @else {
+                      <ion-icon name="ban-outline" aria-hidden="true"></ion-icon>
+                    }
+                    Suspender
+                  </button>
+                }
+              }
+            </div>
+
+            @if (expandidos().has(u.id)) {
+              <ul class="motos">
+                @for (m of u.motos; track m.id) {
+                  <li class="moto" [class.inactive]="!m.activa">
+                    <span class="moto-icon"><ion-icon name="bicycle" aria-hidden="true"></ion-icon></span>
+                    <div class="moto-info">
+                      <strong>{{ m.marca }} {{ m.modelo }}</strong>
+                      <small>{{ m.cilindrada ? m.cilindrada + ' cc · ' : '' }}Desde {{ m.created_at | date: 'MMM y' : undefined : 'es' }}</small>
+                    </div>
+                    <span class="plate">{{ m.placa }}</span>
+                    @if (!m.activa) {
+                      <span class="badge muted">Inactiva</span>
+                    }
+                  </li>
+                }
+              </ul>
+            }
+          </li>
+        }
+      </ul>
+    }
+  </div>
+</ion-content>

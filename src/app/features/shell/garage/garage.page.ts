@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import {
   IonHeader,
@@ -8,23 +8,36 @@ import {
   IonButton,
   IonIcon,
   IonContent,
+  IonSpinner,
+  ViewWillEnter,
 } from '@ionic/angular/standalone';
 
 import { MotosService } from '@core/services/motos.service';
+import { GarajeDatosService } from '@core/services/garaje-datos.service';
+import { formatoKm } from '@shared/utils/garaje.util';
 
 /**
  * Garaje: listado de motocicletas del usuario (tabla `motos` de Supabase).
  *
  * Estado vacio con CTA a "Registrar moto" (prerequisito de los formularios
  * de combustible/mantenimiento/SOAT/RTM) o lista simple de motos ya creadas.
- * La ficha completa por moto (documentos, mantenimiento, km real) sigue
- * pendiente en `moto-detail` (ver `mockups/VISTAS.md`, seccion 3.2/3.4).
+ * Cada tarjeta muestra el km actual estimado y abre la ficha `garaje/detalle/:id`.
  */
 @Component({
   selector: 'app-garage',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RouterLink, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon, IonContent],
+  imports: [
+    RouterLink,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonButtons,
+    IonButton,
+    IonIcon,
+    IonContent,
+    IonSpinner,
+  ],
   template: `
     <ion-header class="ion-no-border">
       <ion-toolbar class="garage-toolbar">
@@ -39,28 +52,33 @@ import { MotosService } from '@core/services/motos.service';
 
     <ion-content [fullscreen]="true" class="garage-content">
       <div class="rod-container">
-        @if (motosService.motos().length === 0) {
+        @if (!motosService.cargado()) {
+          <div class="garage-empty"><ion-spinner name="crescent"></ion-spinner></div>
+        } @else if (motosService.motos().length === 0) {
           <div class="garage-empty">
-            <div class="empty-icon-wrap">
-              <ion-icon name="bicycle" aria-hidden="true"></ion-icon>
+            <div class="rod-rings" aria-hidden="true">
+              <ion-icon name="home-outline"></ion-icon>
+              <span class="rod-rings-badge"><ion-icon name="bicycle"></ion-icon></span>
             </div>
             <h2 class="empty-title">Tu garaje está vacío</h2>
             <p class="empty-subtitle">
-              Aquí aparecerán tus motos con su SOAT, tecnomecánica y kilometraje.
+              Registra tu primera motocicleta para empezar a gestionar sus documentos y mantenimiento.
             </p>
-            <ion-button class="rod-btn-primary add-moto-btn" routerLink="/app/garaje/nueva">
-              Registrar moto
+            <ion-button shape="round" class="rod-btn-primary add-moto-btn" routerLink="/app/garaje/nueva">
+              <ion-icon slot="start" name="add-circle-outline" aria-hidden="true"></ion-icon>
+              Registrar motocicleta
             </ion-button>
           </div>
         } @else {
           <div class="moto-grid">
             @for (moto of motosService.motos(); track moto.id) {
-              <a class="rod-card moto" routerLink="/app/garaje/detalle">
-                <div class="foto"><ion-icon name="bicycle-outline" aria-hidden="true"></ion-icon></div>
-                <div>
+              <a class="rod-card moto" [routerLink]="['/app/garaje/detalle', moto.id]">
+                <div class="foto"><ion-icon name="bicycle" aria-hidden="true"></ion-icon></div>
+                <div class="moto-text">
                   <h2>{{ moto.marca }} {{ moto.modelo }}</h2>
-                  <p>{{ moto.placa }} · {{ moto.odometro_inicial }} km</p>
+                  <p>{{ formatoKm(datos.kmActualDe(moto)) }}{{ moto.cilindrada ? ' · ' + moto.cilindrada + ' cc' : '' }}</p>
                 </div>
+                <span class="plate">{{ moto.placa }}</span>
               </a>
             }
           </div>
@@ -78,12 +96,10 @@ import { MotosService } from '@core/services/motos.service';
 
       .garage-title {
         font-family: var(--rod-font-heading);
-        font-size: 26px;
-        font-weight: 700;
-        letter-spacing: -0.3px;
+        font-size: 17px;
+        font-weight: 600;
         color: var(--rod-text-heading);
-        text-align: left;
-        padding-inline-start: 12px;
+        text-align: center;
       }
 
       .garage-content {
@@ -100,22 +116,6 @@ import { MotosService } from '@core/services/motos.service';
         max-width: 420px;
         margin: 0 auto;
         padding: 40px 20px;
-      }
-
-      .empty-icon-wrap {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 24px;
-        background: rgba(17, 180, 212, 0.12);
-
-        ion-icon {
-          font-size: 42px;
-          color: var(--ion-color-primary);
-        }
       }
 
       .empty-title {
@@ -167,7 +167,23 @@ import { MotosService } from '@core/services/motos.service';
         border-radius: 14px;
         display: grid;
         place-items: center;
-        background: var(--rod-bg-base);
+        background: var(--rod-accent-soft);
+      }
+      .moto .moto-text {
+        flex: 1;
+        min-width: 0;
+      }
+      .plate {
+        flex: none;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: #f5c518;
+        border: 1.5px solid #1a1c1e;
+        color: #1a1c1e;
+        font-family: var(--rod-font-heading);
+        font-weight: 800;
+        font-size: 12px;
+        letter-spacing: 1px;
       }
       .moto .foto ion-icon {
         font-size: 28px;
@@ -187,10 +203,13 @@ import { MotosService } from '@core/services/motos.service';
     `,
   ],
 })
-export class GaragePage implements OnInit {
+export class GaragePage implements ViewWillEnter {
   readonly motosService = inject(MotosService);
+  readonly datos = inject(GarajeDatosService);
+  readonly formatoKm = formatoKm;
 
-  ngOnInit(): void {
-    void this.motosService.cargar();
+  ionViewWillEnter(): void {
+    // Recarga al volver (p. ej. tras registrar una moto o una tanqueada).
+    void this.datos.cargar(true);
   }
 }

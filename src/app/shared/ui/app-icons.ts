@@ -34,6 +34,15 @@ import {
   cloudOfflineOutline,
   createOutline,
   trashOutline,
+  peopleOutline,
+  searchOutline,
+  banOutline,
+  chevronDownOutline,
+  refreshOutline,
+  calendarOutline,
+  addCircleOutline,
+  briefcaseOutline,
+  contrastOutline,
 } from 'ionicons/icons';
 
 /**
@@ -82,6 +91,17 @@ export function registrarIconos(): void {
     'chevron-forward-outline': chevronForwardOutline,
     'create-outline': createOutline,
     'trash-outline': trashOutline,
+
+    // Panel de administrador
+    'people-outline': peopleOutline,
+    'search-outline': searchOutline,
+    'ban-outline': banOutline,
+    'chevron-down-outline': chevronDownOutline,
+    'refresh-outline': refreshOutline,
+    'calendar-outline': calendarOutline,
+    'add-circle-outline': addCircleOutline,
+    'briefcase-outline': briefcaseOutline,
+    'contrast-outline': contrastOutline,
 
     // Feedback (toasts / estados)
     'alert-circle-outline': alertCircleOutline,

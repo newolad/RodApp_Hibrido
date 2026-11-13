@@ -1,0 +1,368 @@
+/*
+ * =============================================================================
+ *  RodApp - Componentes visuales del Figma
+ * =============================================================================
+ *  Piezas reutilizables extraidas de los frames "Perfil", "Garaje vacio",
+ *  "Detalle Documento RTM" y "Registro de tu Moto". Se importan desde
+ *  src/global.scss para que cualquier vista las use con una clase, sin
+ *  duplicar estilos por pagina. Todo sale de los tokens de variables.scss.
+ * =============================================================================
+ */
+
+/* ----- Barra de tabs: etiquetas en mayusculas y borde superior sutil ----- */
+ion-tab-bar {
+  --background: var(--rod-bg-base);
+  --border: 1px solid var(--rod-border);
+  padding-bottom: var(--ion-safe-area-bottom, 0);
+  height: calc(62px + var(--ion-safe-area-bottom, 0px));
+}
+
+ion-tab-button {
+  --color: var(--rod-text-muted);
+  --color-selected: var(--ion-color-primary);
+
+  ion-label {
+    margin-top: 4px;
+    font-family: var(--rod-font-heading);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+  }
+
+  ion-icon {
+    font-size: 22px;
+  }
+}
+
+/* ----- Toolbars de detalle: titulo centrado y flecha cian ----- */
+ion-toolbar {
+  --background: var(--rod-bg-base);
+  --color: var(--rod-text-heading);
+  --border-width: 0;
+}
+
+ion-toolbar ion-title {
+  font-family: var(--rod-font-heading);
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
+
+ion-back-button {
+  --color: var(--ion-color-primary);
+}
+
+/* ----- Etiqueta de seccion ("CUENTA", "PREFERENCIAS", "INFORMACION...") ----- */
+.rod-section-label {
+  margin: 24px 4px 10px;
+  font-family: var(--rod-font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--rod-text-secondary);
+
+  &.accent {
+    color: var(--ion-color-primary);
+  }
+}
+
+/* ----- Lista agrupada con filas e icono en baldosa (Perfil / Detalle RTM) ----- */
+.rod-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.rod-list-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  box-sizing: border-box;
+  border-radius: var(--rod-radius-field);
+  border: 1px solid var(--rod-border);
+  background: var(--rod-bg-alt);
+  color: var(--rod-text-heading);
+  font-family: var(--rod-font-body);
+  font-size: 14px;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    border-color: var(--rod-border-accent);
+  }
+
+  .rod-list-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .rod-list-text small {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--rod-text-secondary);
+  }
+  .rod-list-text strong {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--rod-text-heading);
+  }
+  .rod-list-chev {
+    font-size: 16px;
+    color: var(--rod-text-muted);
+  }
+}
+
+/* Filas informativas (no clicables) */
+div.rod-list-item {
+  cursor: default;
+
+  &:hover {
+    border-color: var(--rod-border);
+  }
+}
+
+.rod-icon-tile {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: var(--rod-accent-soft);
+  color: var(--ion-color-primary);
+  font-size: 18px;
+}
+
+/* ----- Chips de estado ("Vigente", "EXPIRA PRONTO") ----- */
+.rod-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: var(--rod-radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+
+  &.ok {
+    color: var(--rod-ok-text);
+    background: rgba(34, 197, 94, 0.16);
+  }
+  &.warn {
+    color: var(--rod-warn-text);
+    background: rgba(245, 158, 11, 0.16);
+    font-size: 10px;
+    text-transform: uppercase;
+  }
+  &.danger {
+    color: var(--rod-danger-text);
+    background: rgba(239, 68, 68, 0.16);
+  }
+}
+
+/* ----- Nota informativa con icono ----- */
+.rod-info-note {
+  display: flex;
+  gap: 10px;
+  padding: 14px;
+  border-radius: var(--rod-radius-field);
+  border: 1px solid var(--rod-border);
+  background: var(--rod-bg-alt);
+  color: var(--rod-text-secondary);
+  font-size: 12px;
+  line-height: 1.5;
+
+  ion-icon {
+    flex: 0 0 auto;
+    font-size: 18px;
+    color: var(--ion-color-primary);
+  }
+}
+
+/* ----- Boton destructivo suave ("Cerrar Sesion") ----- */
+.rod-btn-danger-soft {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--rod-radius-field);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--rod-danger-text);
+  font-family: var(--rod-font-heading);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  ion-icon {
+    font-size: 18px;
+  }
+  &:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.18);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+/* ----- Ilustracion de estado vacio: anillos concentricos + insignia ----- */
+.rod-rings {
+  position: relative;
+  width: 210px;
+  height: 210px;
+  margin: 0 auto 28px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(
+    circle,
+    rgba(17, 180, 212, 0.16) 0 34%,
+    rgba(17, 180, 212, 0.09) 34% 56%,
+    rgba(17, 180, 212, 0.05) 56% 100%
+  );
+
+  > ion-icon {
+    font-size: 84px;
+    color: var(--ion-color-primary);
+  }
+
+  .rod-rings-badge {
+    position: absolute;
+    right: 40px;
+    bottom: 44px;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    background: var(--ion-color-primary);
+    color: #ffffff;
+    font-size: 22px;
+    box-shadow: var(--rod-accent-glow);
+    border: 3px solid var(--rod-bg-base);
+  }
+}
+
+/* ----- Campos de formulario: ion-item.rod-card + ion-input apilado -----
+ * Figma "Registro de tu Moto": etiqueta cian en mayusculas FUERA del campo y
+ * campo rectangular redondeado con fondo teal. Aplica a los formularios de
+ * moto, SOAT, RTM, combustible, mantenimiento y perfil sin tocar su HTML.
+ */
+ion-item.rod-card {
+  --background: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  margin-bottom: 16px;
+}
+
+ion-item.rod-card ion-input,
+ion-item.rod-card ion-textarea {
+  --color: var(--rod-text-heading);
+  --placeholder-color: var(--rod-text-muted);
+  --placeholder-opacity: 1;
+  --highlight-color-focused: var(--ion-color-primary);
+}
+
+ion-item.rod-card ion-input .label-text-wrapper,
+ion-item.rod-card ion-textarea .label-text-wrapper,
+ion-item.rod-card ion-select::part(label) {
+  margin-bottom: 8px;
+  max-width: 100% !important;
+  font-family: var(--rod-font-heading);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.9px;
+  text-transform: uppercase;
+  color: var(--ion-color-primary) !important;
+  transform: none !important;
+}
+
+ion-item.rod-card ion-input .native-wrapper,
+ion-item.rod-card ion-textarea .native-wrapper,
+ion-item.rod-card ion-select::part(container) {
+  min-height: 48px;
+  padding: 0 14px;
+  box-sizing: border-box;
+  border-radius: var(--rod-radius-field);
+  border: 1px solid var(--rod-border);
+  background: var(--rod-surface);
+  transition: border-color 0.15s ease;
+}
+
+ion-item.rod-card ion-input.has-focus .native-wrapper,
+ion-item.rod-card ion-textarea.has-focus .native-wrapper {
+  border-color: var(--ion-color-primary);
+}
+
+/* ----- Alertas con la paleta de la app ----- */
+ion-alert {
+  --background: var(--rod-bg-alt);
+  --backdrop-opacity: 0.6;
+}
+ion-alert .alert-title {
+  color: var(--rod-text-heading) !important;
+}
+ion-alert .alert-message {
+  color: var(--rod-text-secondary) !important;
+}
+ion-alert .alert-button {
+  color: var(--ion-color-primary) !important;
+}
+ion-alert .alert-button-role-destructive {
+  color: var(--rod-danger-text) !important;
+}
+
+/* ----- Chips de filtro (Historial, Consejos, selector de moto) ----- */
+.rod-chips {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.rod-chip-filtro {
+  flex: none;
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 14px;
+  border-radius: var(--rod-radius-pill, 999px);
+  background: var(--rod-bg-alt);
+  border: 1px solid var(--rod-border);
+  color: var(--rod-text-secondary);
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  &:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
+  }
+
+  &.activo {
+    background: var(--ion-color-primary);
+    border-color: var(--ion-color-primary);
+    color: #fff;
+  }
+}

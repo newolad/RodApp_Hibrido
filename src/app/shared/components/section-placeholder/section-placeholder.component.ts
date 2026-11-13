@@ -25,8 +25,8 @@ import {
     <ion-content [fullscreen]="true" class="section-content">
       <div class="rod-container">
         <div class="section-empty">
-          <div class="empty-icon-wrap">
-            <ion-icon [name]="icono" aria-hidden="true"></ion-icon>
+          <div class="rod-rings" aria-hidden="true">
+            <ion-icon [name]="icono"></ion-icon>
           </div>
           <h2 class="empty-title">{{ tituloVacio }}</h2>
           <p class="empty-subtitle">{{ descripcion }}</p>
@@ -45,12 +45,10 @@ import {
 
       .section-title {
         font-family: var(--rod-font-heading);
-        font-size: 26px;
-        font-weight: 700;
-        letter-spacing: -0.3px;
+        font-size: 17px;
+        font-weight: 600;
         color: var(--rod-text-heading);
-        text-align: left;
-        padding-inline-start: 12px;
+        text-align: center;
       }
 
       .section-content {
@@ -67,22 +65,6 @@ import {
         max-width: 440px;
         margin: 0 auto;
         padding: 40px 20px;
-      }
-
-      .empty-icon-wrap {
-        width: 80px;
-        height: 80px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 24px;
-        background: rgba(17, 180, 212, 0.12);
-
-        ion-icon {
-          font-size: 40px;
-          color: var(--ion-color-primary);
-        }
       }
 
       .empty-title {

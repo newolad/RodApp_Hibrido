@@ -74,6 +74,19 @@
           <div class="map-loading"><span class="spinner"></span><span>Cargando mapa…</span></div>
         }
         <div #mapCanvas class="map-canvas" aria-label="Mapa interactivo de Bogotá"></div>
+        @if (weatherResults.length) {
+          <div class="map-rain-legend" aria-live="polite">
+            <strong>🌧 Lluvia en la ruta · próx. 3 h</strong>
+            <small>
+              {{ rainyCount ? rainyCount + ' de ' + weatherResults.length + ' tramos con posible lluvia' : 'Sin lluvia relevante prevista' }}
+            </small>
+            <div class="legend-row">
+              <span><i class="swatch-line" style="background:#d8a51d"></i>Media</span>
+              <span><i class="swatch-line" style="background:#e87536"></i>Alta</span>
+              <span><i class="swatch-line" style="background:#c94352"></i>Muy alta</span>
+            </div>
+          </div>
+        }
       </section>
 
       <aside class="details-column">
@@ -151,7 +164,7 @@
           }
         </section>
 
-        <p class="disclaimer">Las rutas para moto de Google están en versión beta: confirma siempre la señalización y los cierres viales. El pronóstico de lluvia usa Open-Meteo (datos CC BY 4.0); es una estimación, no radar en vivo ni medición de pluviómetro. Los reportes se guardan localmente en cada dispositivo; no se sincronizan entre equipos.</p>
+        <p class="disclaimer">Las rutas se calculan con OpenStreetMap (OSRM): confirma siempre la señalización y los cierres viales. El pronóstico de lluvia usa Open-Meteo (datos CC BY 4.0); es una estimación, no radar en vivo ni medición de pluviómetro. Los reportes se guardan localmente en cada dispositivo; no se sincronizan entre equipos.</p>
       </aside>
     </div>
   </main>

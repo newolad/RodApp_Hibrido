@@ -17,7 +17,39 @@ export interface Perfil {
   correo?: string | null;
   avatar_url?: string | null;
   rol?: 'user' | 'admin';
+  /** Cuenta suspendida por un administrador (ver migracion panel_admin). */
+  suspendido?: boolean;
+  suspendido_motivo?: string | null;
   created_at?: string;
+}
+
+/* ========================= Panel de administrador ===================== */
+
+/** Moto resumida tal como la devuelve la RPC `admin_listar_usuarios`. */
+export interface AdminMoto {
+  id: string;
+  marca: string;
+  modelo: string;
+  placa: string;
+  cilindrada: number | null;
+  activa: boolean;
+  created_at: string;
+}
+
+/** Fila de la RPC `admin_listar_usuarios` (perfil + datos de auth + motos). */
+export interface AdminUsuario {
+  id: string;
+  name: string;
+  lastname: string | null;
+  correo: string | null;
+  avatar_url: string | null;
+  rol: 'user' | 'admin';
+  suspendido: boolean;
+  suspendido_en: string | null;
+  suspendido_motivo: string | null;
+  created_at: string;
+  ultimo_acceso: string | null;
+  motos: AdminMoto[];
 }
 
 /** Datos que el formulario de registro envia a `AuthService.signUp`. */
@@ -99,4 +131,49 @@ export interface MantenimientoInsert {
   costo?: number | null;
   repetir_cada_km?: number | null;
   notas?: string | null;
+}
+
+/* ===================== Filas leidas de Supabase ===================== */
+// Version "fila" (con id y created_at) de los inserts de arriba, mas las
+// tablas de solo lectura del usuario (notificaciones, consejos).
+
+export interface Soat extends SoatInsert {
+  id: string;
+  created_at: string;
+}
+
+export interface Rtm extends RtmInsert {
+  id: string;
+  created_at: string;
+}
+
+export interface RegistroCombustible extends CombustibleInsert {
+  id: string;
+  created_at: string;
+}
+
+export interface RegistroMantenimiento extends MantenimientoInsert {
+  id: string;
+  created_at: string;
+}
+
+export interface Notificacion {
+  id: string;
+  user_id: string;
+  icono: string;
+  color: string;
+  titulo: string;
+  detalle: string;
+  leida: boolean;
+  created_at: string;
+}
+
+export interface Consejo {
+  id: string;
+  categoria: string;
+  titulo: string;
+  resumen: string;
+  contenido: string;
+  lectura: string;
+  created_at: string;
 }

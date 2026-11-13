@@ -1,67 +1,103 @@
 <ion-header class="ion-no-border">
   <ion-toolbar class="profile-toolbar">
-    <ion-title class="profile-title">Perfil</ion-title>
-  </ion-toolbar>
-</ion-header>
-
-<ion-content [fullscreen]="true" class="profile-content">
-  <div class="rod-container">
-
-    <!-- Tarjeta de identidad (datos de la sesion de Supabase) -->
-    <section class="perfil-card">
-      <div class="avatar">
+    <!-- Cabecera del Figma: mini avatar + "Configuracion / RodApp" + engranaje -->
+    <div class="profile-top">
+      <div class="mini-avatar" aria-hidden="true">
         @if (sesion()?.avatarUrl) {
-          <img [src]="sesion()!.avatarUrl" alt="Foto de perfil" />
+          <img [src]="sesion()!.avatarUrl" alt="" />
         } @else {
           <span>{{ iniciales() }}</span>
         }
       </div>
-      <div class="datos">
-        <h2>{{ sesion()?.nombre ?? 'Carlos Rodríguez' }}</h2>
-        <p>{{ sesion()?.email ?? 'carlos.rodriguez@ejemplo.com' }}</p>
+      <div class="top-text">
+        <small>Configuración</small>
+        <strong>RodApp</strong>
       </div>
-    </section>
-
-    <!-- Opciones estilo Figma -->
-    <section class="opciones">
-      <button type="button" class="opcion" routerLink="/app/perfil/editar">
-        <div class="opcion-left">
-          <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
-          <span>Editar datos personales</span>
-        </div>
-        <ion-icon name="chevron-forward-outline" class="chev" aria-hidden="true"></ion-icon>
-      </button>
-      <button type="button" class="opcion" routerLink="/app/notificaciones">
-        <div class="opcion-left">
-          <ion-icon name="notifications-outline" aria-hidden="true"></ion-icon>
-          <span>Notificaciones</span>
-        </div>
-        <ion-icon name="chevron-forward-outline" class="chev" aria-hidden="true"></ion-icon>
-      </button>
-      <button type="button" class="opcion" routerLink="/app/perfil/ajustes">
-        <div class="opcion-left">
-          <ion-icon name="shield-checkmark-outline" aria-hidden="true"></ion-icon>
-          <span>Seguridad</span>
-        </div>
-        <ion-icon name="chevron-forward-outline" class="chev" aria-hidden="true"></ion-icon>
-      </button>
-    </section>
-
-    <!-- Cerrar sesion -->
-    <div class="logout-wrapper">
-      <button
-        type="button"
-        class="logout-outline-btn"
-        [disabled]="cerrando()"
-        (click)="cerrarSesion()"
-      >
-        @if (cerrando()) {
-          <ion-spinner name="crescent"></ion-spinner>
-        } @else {
-          <ion-icon name="log-out-outline" aria-hidden="true"></ion-icon>
-        }
-        <span>{{ cerrando() ? 'Cerrando...' : 'Cerrar sesión' }}</span>
+      <button type="button" class="gear" routerLink="/app/perfil/ajustes" aria-label="Ajustes">
+        <ion-icon name="settings-outline" aria-hidden="true"></ion-icon>
       </button>
     </div>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="profile-content">
+  <div class="rod-container profile">
+
+    <!-- Identidad -->
+    <section class="identity">
+      <div class="avatar-ring">
+        <div class="avatar">
+          @if (sesion()?.avatarUrl) {
+            <img [src]="sesion()!.avatarUrl" alt="Foto de perfil" />
+          } @else {
+            <span>{{ iniciales() }}</span>
+          }
+        </div>
+        <button type="button" class="avatar-edit" routerLink="/app/perfil/editar" aria-label="Editar datos personales">
+          <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
+        </button>
+      </div>
+      <h1>{{ sesion()?.nombre ?? 'Motero RodApp' }}</h1>
+      <p>{{ subtitulo() }}</p>
+    </section>
+
+    <!-- Cuenta -->
+    <p class="rod-section-label">Cuenta</p>
+    <nav class="rod-list" aria-label="Cuenta">
+      <a class="rod-list-item" routerLink="/app/garaje/nueva">
+        <span class="rod-icon-tile"><ion-icon name="bicycle-outline" aria-hidden="true"></ion-icon></span>
+        <span class="rod-list-text">Añadir motocicleta</span>
+        <ion-icon name="chevron-forward-outline" class="rod-list-chev" aria-hidden="true"></ion-icon>
+      </a>
+      <a class="rod-list-item" routerLink="/app/garaje/soat/nuevo">
+        <span class="rod-icon-tile"><ion-icon name="document-text-outline" aria-hidden="true"></ion-icon></span>
+        <span class="rod-list-text">Añadir documentos legales</span>
+        <ion-icon name="chevron-forward-outline" class="rod-list-chev" aria-hidden="true"></ion-icon>
+      </a>
+      <a class="rod-list-item" routerLink="/app/perfil/editar">
+        <span class="rod-icon-tile"><ion-icon name="person-outline" aria-hidden="true"></ion-icon></span>
+        <span class="rod-list-text">Editar datos personales</span>
+        <ion-icon name="chevron-forward-outline" class="rod-list-chev" aria-hidden="true"></ion-icon>
+      </a>
+    </nav>
+
+    <!-- Preferencias -->
+    <p class="rod-section-label">Preferencias</p>
+    <nav class="rod-list" aria-label="Preferencias">
+      <a class="rod-list-item" routerLink="/app/notificaciones">
+        <span class="rod-icon-tile warn"><ion-icon name="notifications-outline" aria-hidden="true"></ion-icon></span>
+        <span class="rod-list-text">Notificaciones</span>
+        <ion-icon name="chevron-forward-outline" class="rod-list-chev" aria-hidden="true"></ion-icon>
+      </a>
+      <a class="rod-list-item" routerLink="/app/perfil/ajustes">
+        <span class="rod-icon-tile"><ion-icon name="shield-checkmark-outline" aria-hidden="true"></ion-icon></span>
+        <span class="rod-list-text">Seguridad</span>
+        <ion-icon name="chevron-forward-outline" class="rod-list-chev" aria-hidden="true"></ion-icon>
+      </a>
+    </nav>
+
+    @if (isAdmin()) {
+      <p class="rod-section-label accent">Administración</p>
+      <nav class="rod-list" aria-label="Administración">
+        <a class="rod-list-item admin-item" routerLink="/app/admin">
+          <span class="rod-icon-tile"><ion-icon name="people-outline" aria-hidden="true"></ion-icon></span>
+          <span class="rod-list-text">
+            <strong>Panel de administrador</strong>
+            <small>Usuarios, motos y suspensiones</small>
+          </span>
+          <ion-icon name="chevron-forward-outline" class="rod-list-chev" aria-hidden="true"></ion-icon>
+        </a>
+      </nav>
+    }
+
+    <!-- Cerrar sesion -->
+    <button type="button" class="rod-btn-danger-soft logout" [disabled]="cerrando()" (click)="cerrarSesion()">
+      @if (cerrando()) {
+        <ion-spinner name="crescent"></ion-spinner>
+      } @else {
+        <ion-icon name="log-out-outline" aria-hidden="true"></ion-icon>
+      }
+      <span>{{ cerrando() ? 'Cerrando...' : 'Cerrar sesión' }}</span>
+    </button>
   </div>
 </ion-content>

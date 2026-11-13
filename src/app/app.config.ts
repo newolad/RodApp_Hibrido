@@ -9,6 +9,7 @@ import { provideIonicAngular } from '@ionic/angular/standalone';
 
 import { routes } from './app.routes';
 import { AuthService } from './core/services/auth.service';
+import { ThemeService } from './core/services/theme.service';
 
 /**
  * Configuracion global de la aplicacion (reemplaza al antiguo AppModule).
@@ -34,6 +35,16 @@ export const appConfig: ApplicationConfig = {
       useFactory: () => {
         const auth = inject(AuthService);
         return () => auth.init();
+      },
+    },
+    {
+      // Aplica el tema guardado (claro / oscuro / automatico) antes de la
+      // primera pantalla, para que no "parpadee" el tema equivocado.
+      provide: APP_INITIALIZER,
+      multi: true,
+      useFactory: () => {
+        const theme = inject(ThemeService);
+        return () => theme.init();
       },
     },
   ],

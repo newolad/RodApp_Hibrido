@@ -8,6 +8,9 @@ export function mensajeErrorAuth(error: unknown): string {
     (error as { message?: string })?.message?.toLowerCase() ??
     String(error ?? '').toLowerCase();
 
+  if (raw.includes('cuenta_suspendida')) {
+    return 'Tu cuenta esta suspendida. Contacta al administrador de RodApp.';
+  }
   if (raw.includes('invalid login credentials')) {
     return 'Correo o contrasena incorrectos.';
   }
@@ -19,6 +22,15 @@ export function mensajeErrorAuth(error: unknown): string {
   }
   if (raw.includes('password should be at least')) {
     return 'La contrasena es demasiado corta (minimo 6 caracteres).';
+  }
+  if (raw.includes('should be different from the old password')) {
+    return 'La nueva contrasena debe ser distinta a la anterior.';
+  }
+  if (raw.includes('auth session missing') || raw.includes('session_not_found')) {
+    return 'Tu enlace de recuperacion vencio. Pide uno nuevo.';
+  }
+  if (raw.includes('weak') && raw.includes('password')) {
+    return 'La contrasena es muy debil. Usa letras, numeros y al menos 6 caracteres.';
   }
   if (raw.includes('unable to validate email address') || raw.includes('invalid email')) {
     return 'El correo no tiene un formato valido.';

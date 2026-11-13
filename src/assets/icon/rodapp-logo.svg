@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 424 249" width="424" height="249" role="img" aria-label="RodApp">
+  <defs>
+    <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M20 0H0V20" fill="none" stroke="#1a2e33" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="424" height="249" fill="transparent"/>
+
+  <g fill="none" stroke="#17B4D6" stroke-width="7">
+    <!-- Arcos concentricos -->
+    <path d="M120 148V130A92 92 0 0 1 304 130V148"/>
+    <path d="M140 148V130A72 72 0 0 1 284 130V148"/>
+    <path d="M160 148V130A52 52 0 0 1 264 130V148"/>
+  </g>
+
+  <!-- Boca del tunel -->
+  <path d="M183 152V130A29 29 0 0 1 241 130V152Z" fill="#101f22" stroke="#17B4D6" stroke-width="6"/>
+
+  <!-- Borde horizontal de la base -->
+  <path d="M100 148H316" stroke="#17B4D6" stroke-width="5" fill="none"/>
+
+  <!-- Carretera -->
+  <g fill="#17B4D6">
+    <path d="M104 193L196 153H228L320 193Z"/>
+  </g>
+  <!-- Franjas oscuras de carril -->
+  <g fill="#101f22">
+    <path d="M205 153H219L236 193H188Z"/>
+    <path d="M128 172L196 160V163L122 176Z"/>
+    <path d="M296 172L228 160V163L302 176Z"/>
+  </g>
+  <!-- Lineas discontinuas del centro -->
+  <g fill="#17B4D6">
+    <path d="M209.500 156H214.500L215.500 164H208.500Z"/>
+    <path d="M208 170H216L217.500 180H206.500Z"/>
+    <path d="M205.500 186H218.500L219.500 193H204.500Z"/>
+  </g>
+
+  <!-- Texto -->
+  <text x="212" y="239" text-anchor="middle" font-family="Montserrat, 'Arial Black', Arial, sans-serif" font-weight="800" font-size="42" fill="#17B4D6" textLength="186" lengthAdjust="spacingAndGlyphs">RODAPP</text>
+</svg>
+

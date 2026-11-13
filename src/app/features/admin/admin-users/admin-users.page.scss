@@ -1,0 +1,423 @@
+// Panel de administrador. Usa solo los tokens de RodApp (src/theme/variables.scss):
+// fondo #101f22, tarjetas #1e2124, acento cian, pildoras y radios de 16px.
+
+:host {
+  --admin-ok: var(--ion-color-success);
+  --admin-danger: var(--ion-color-danger);
+}
+
+.admin {
+  padding-bottom: 48px;
+}
+
+.hero {
+  margin-bottom: 20px;
+
+  .eyebrow {
+    margin: 0 0 6px;
+    font-family: var(--rod-font-heading);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--ion-color-primary);
+  }
+}
+
+/* ---------- Indicadores ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 14px 16px;
+  border-radius: var(--rod-radius-card);
+  background: var(--rod-bg-alt);
+  border: 1px solid var(--rod-border);
+
+  ion-icon {
+    font-size: 20px;
+    color: var(--ion-color-primary);
+    margin-bottom: 6px;
+  }
+  strong {
+    font-family: var(--rod-font-heading);
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--rod-text-heading);
+    line-height: 1.1;
+  }
+  span {
+    font-size: 12px;
+    color: var(--rod-text-secondary);
+  }
+
+  &.ok ion-icon { color: var(--admin-ok); }
+  &.danger ion-icon { color: var(--admin-danger); }
+}
+
+/* ---------- Busqueda + filtros ---------- */
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.search {
+  flex: 1 1 280px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 48px;
+  padding: 0 18px;
+  border-radius: var(--rod-radius-pill);
+  background: var(--rod-bg-alt);
+  border: 1px solid var(--rod-border);
+  transition: border-color 0.15s ease;
+
+  &:focus-within {
+    border-color: var(--ion-color-primary);
+  }
+  ion-icon {
+    font-size: 18px;
+    color: var(--rod-text-secondary);
+  }
+  input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--rod-text-heading);
+    font-family: var(--rod-font-body);
+    font-size: 14px;
+
+    &::placeholder { color: var(--rod-text-muted); }
+  }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  height: 36px;
+  padding: 0 16px;
+  border-radius: var(--rod-radius-pill);
+  border: 1px solid var(--rod-border);
+  background: transparent;
+  color: var(--rod-text-body);
+  font-family: var(--rod-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  &:hover { border-color: var(--rod-border-accent); }
+  &.active {
+    background: var(--rod-accent-soft);
+    border-color: var(--ion-color-primary);
+    color: var(--ion-color-primary);
+  }
+}
+
+.count {
+  margin: 0 0 10px;
+  font-size: 12px;
+  color: var(--rod-text-muted);
+}
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 56px 0;
+  color: var(--rod-text-secondary);
+
+  ion-spinner { --color: var(--ion-color-primary); }
+}
+
+.retry {
+  margin-top: 8px;
+  height: 44px;
+}
+
+/* ---------- Tarjeta de usuario ---------- */
+.users {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-card {
+  padding: 16px;
+  border-radius: var(--rod-radius-card);
+  background: var(--rod-bg-alt);
+  border: 1px solid var(--rod-border);
+  border-left: 3px solid var(--ion-color-primary);
+
+  &.suspended {
+    border-left-color: var(--admin-danger);
+    background: linear-gradient(90deg, rgba(var(--ion-color-danger-rgb), 0.06), transparent 40%), var(--rod-bg-alt);
+  }
+}
+
+.user-main {
+  display: flex;
+  gap: 14px;
+  min-width: 0;
+}
+
+.avatar {
+  flex: 0 0 auto;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--rod-accent-soft);
+  border: 1px solid var(--rod-border-accent);
+  color: var(--ion-color-primary);
+  font-family: var(--rod-font-heading);
+  font-weight: 700;
+  font-size: 16px;
+
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+
+.suspended .avatar {
+  filter: grayscale(1);
+  opacity: 0.7;
+}
+
+.user-info {
+  min-width: 0;
+  flex: 1;
+
+  h2 {
+    margin: 0;
+    font-family: var(--rod-font-heading);
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--rod-text-heading);
+  }
+  .email {
+    margin: 2px 0 6px;
+    font-size: 13px;
+    color: var(--rod-text-body);
+    overflow-wrap: anywhere;
+  }
+  .meta,
+  .suspension {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin: 0;
+    font-size: 12px;
+    color: var(--rod-text-secondary);
+
+    ion-icon { font-size: 13px; }
+  }
+  .dot { margin: 0 2px; }
+  .suspension {
+    margin-top: 6px;
+    color: var(--rod-danger-text);
+  }
+}
+
+.name-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: var(--rod-radius-pill);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border: 1px solid transparent;
+
+  &.admin {
+    color: var(--ion-color-primary);
+    background: var(--rod-accent-soft);
+    border-color: var(--rod-border-accent);
+  }
+  &.me {
+    color: var(--rod-text-body);
+    background: var(--rod-surface-2);
+  }
+  &.ok {
+    color: var(--admin-ok);
+    background: rgba(var(--ion-color-success-rgb), 0.12);
+  }
+  &.danger {
+    color: var(--admin-danger);
+    background: rgba(var(--ion-color-danger-rgb), 0.14);
+  }
+  &.muted {
+    color: var(--rod-text-secondary);
+    background: var(--rod-surface);
+  }
+}
+
+/* ---------- Acciones ---------- */
+.user-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--rod-border);
+}
+
+.motos-toggle,
+.action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: var(--rod-radius-pill);
+  font-family: var(--rod-font-body);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+
+  ion-icon { font-size: 16px; }
+  ion-spinner { width: 16px; height: 16px; }
+  &:disabled { cursor: default; opacity: 0.55; }
+}
+
+.motos-toggle {
+  border: 1px solid var(--rod-border);
+  background: transparent;
+  color: var(--rod-text-body);
+
+  ion-icon:first-child { color: var(--ion-color-primary); }
+  .chev { transition: transform 0.2s ease; }
+  &.open .chev { transform: rotate(180deg); }
+  &:not(:disabled):hover { border-color: var(--rod-border-accent); }
+}
+
+.action.suspend {
+  border: 1px solid rgba(var(--ion-color-danger-rgb), 0.5);
+  background: transparent;
+  color: var(--admin-danger);
+
+  &:not(:disabled):hover { background: rgba(var(--ion-color-danger-rgb), 0.1); }
+}
+
+.action.enable {
+  border: 1px solid transparent;
+  background: var(--ion-color-primary);
+  color: #ffffff;
+
+  &:not(:disabled):hover { background: var(--ion-color-primary-shade); }
+}
+
+/* ---------- Motos del usuario ---------- */
+.motos {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.moto {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--rod-bg-base);
+  border: 1px solid var(--rod-border);
+
+  &.inactive { opacity: 0.6; }
+}
+
+.moto-icon {
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--rod-accent-soft);
+  color: var(--ion-color-primary);
+  font-size: 18px;
+}
+
+.moto-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+
+  strong {
+    font-size: 14px;
+    color: var(--rod-text-heading);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  small {
+    font-size: 12px;
+    color: var(--rod-text-secondary);
+  }
+}
+
+// Placa estilo colombiano (fondo amarillo, letras negras) como guino visual.
+.plate {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #f5c518;
+  border: 1.5px solid #1a1c1e;
+  color: #1a1c1e;
+  font-family: var(--rod-font-heading);
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 1px;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 640px) {
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .user-actions .action,
+  .user-actions .motos-toggle {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}

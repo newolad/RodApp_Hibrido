@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, input, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
@@ -20,6 +20,7 @@ import {
 import { MotosService } from '@core/services/motos.service';
 import { NotificationService } from '@core/services/notification.service';
 import { SupabaseService } from '@core/services/supabase.service';
+import { GarajeDatosService } from '@core/services/garaje-datos.service';
 
 /**
  * Frame Figma "Registro de Nueva Tarea" (2:1028).
@@ -192,10 +193,17 @@ export class MaintenanceTaskFormPage implements OnInit {
     notas: [''],
   });
 
+  /** Query param `?moto=<id>`: preselecciona la moto (desde su ficha). */
+  readonly moto = input<string>();
+
+  private readonly garaje = inject(GarajeDatosService);
+
   async ngOnInit(): Promise<void> {
     await this.motosService.cargar();
-    const activa = this.motosService.motoActiva();
-    if (activa) this.form.patchValue({ motoId: activa.id });
+    const solicitada = this.moto();
+    const existe = solicitada && this.motosService.motos().some((m) => m.id === solicitada);
+    const motoId = existe ? solicitada : this.motosService.motoActiva()?.id;
+    if (motoId) this.form.patchValue({ motoId });
   }
 
   async guardar(): Promise<void> {
@@ -224,6 +232,7 @@ export class MaintenanceTaskFormPage implements OnInit {
         notas: notas || null,
       });
       if (error) throw error;
+      void this.garaje.cargar(true);
       await this.notify.success('Tarea de mantenimiento registrada.');
       await this.router.navigateByUrl('/app/mantenimiento');
     } catch (error) {
